@@ -26,9 +26,7 @@ export default async function RootLayout({
         >
           {children}
           <Toaster />
-          <div>
-            {/* <ChatbotPage user={profile} /> */}
-          </div>
+          <div>{/* <ChatbotPage user={profile} /> */}</div>
         </body>
       </html>
     </ClerkProvider>

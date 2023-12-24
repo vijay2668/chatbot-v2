@@ -71,7 +71,7 @@ export const ChatbotList = ({ user }: any) => {
       <Label className="text-base font-semibold">
         {chatbots?.length} Live bots
       </Label>
-      <div className="w-full h-full flex flex-col space-y-4 overflow-y-scroll">
+      <div className="w-full h-full flex flex-col space-y-4 overflow-y-scroll scrollbar-hide">
         {chatbots?.map((chatbot: any) => (
           <Card
             key={chatbot?.id}

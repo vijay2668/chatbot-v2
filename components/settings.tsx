@@ -14,6 +14,13 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { FileUpload } from "@/components/file-upload";
+import { LiaRobotSolid } from "react-icons/lia";
+import { BsRobot } from "react-icons/bs";
+import { BiSupport } from "react-icons/bi";
+import { MdChatBubbleOutline } from "react-icons/md";
+import { MdSupportAgent } from "react-icons/md";
+import { SlSupport } from "react-icons/sl";
+import { SiProbot } from "react-icons/si";
 
 const Settings = ({ user }: any) => {
   const params = useParams();
@@ -21,53 +28,65 @@ const Settings = ({ user }: any) => {
 
   let bot_id = params?.chatbotId;
 
-  const chatbot_id = user?.chatbots?.find(
+  const chatbot = user?.chatbots?.find(
     (chatbot: any) => chatbot?.bot_id === bot_id
   );
 
   const [form, setform] = useState({
-    id: chatbot_id?.id,
+    id: chatbot?.id,
     bot_id: bot_id,
-    bot_name: "",
-    company_name: "chatbot",
-    description: "",
-    company_logo: "",
-    bot_avatar: "",
-    chat_bubble_icon: "",
-    accent_colour: "",
-    subheading: "Our bot answers instantly",
-    welcome_message: "Hey there, how can I help you?",
-    input_box_placeholder: "Send a message...",
-    botsonic_branding_on_the_widget: "show",
-    widget_position: "right",
-    show_sources_with_the_response: "show",
-    post_chat_feedback: "show",
-    widget: "open",
-    show_floating_welcome_message: false,
-    show_floating_starter_questions: false
+    bot_name: chatbot?.bot_name || "",
+    company_name: chatbot?.company_name || "",
+    description: chatbot?.description || "",
+    company_logo: chatbot?.company_logo || "",
+    bot_avatar: chatbot?.bot_avatar || "",
+    chat_bubble_icon: chatbot?.chat_bubble_icon || "",
+    accent_colour: chatbot?.accent_colour || "#6366f1",
+    subheading: chatbot?.subheading || "Our bot answers instantly",
+    welcome_message:
+      chatbot?.welcome_message || "Hey there, how can I help you?",
+    input_box_placeholder:
+      chatbot?.input_box_placeholder || "Send a message...",
+    botsonic_branding_on_the_widget:
+      chatbot?.botsonic_branding_on_the_widget || "show",
+    widget_position: chatbot?.widget_position || "right",
+    show_sources_with_the_response:
+      chatbot?.show_sources_with_the_response || "show",
+    post_chat_feedback: chatbot?.post_chat_feedback || "show",
+    widget: chatbot?.widget || "open",
+    show_floating_welcome_message:
+      chatbot?.show_floating_welcome_message || false,
+    show_floating_starter_questions:
+      chatbot?.show_floating_starter_questions || false
   });
 
   const handleReset = () => {
     setform({
-      id: user?.id,
+      id: chatbot?.id,
       bot_id: bot_id,
-      bot_name: "New Bot",
-      company_name: "",
-      description: "",
-      company_logo: "",
-      bot_avatar: "",
-      chat_bubble_icon: "",
-      accent_colour: "#6366f1",
-      subheading: "Our bot answers instantly",
-      welcome_message: "Hey there, how can I help you?",
-      input_box_placeholder: "Send a message...",
-      botsonic_branding_on_the_widget: "show",
-      widget_position: "right",
-      show_sources_with_the_response: "show",
-      post_chat_feedback: "show",
-      widget: "open",
-      show_floating_welcome_message: false,
-      show_floating_starter_questions: false
+      bot_name: chatbot?.bot_name || "",
+      company_name: chatbot?.company_name || "",
+      description: chatbot?.description || "",
+      company_logo: chatbot?.company_logo || "",
+      bot_avatar: chatbot?.bot_avatar || "",
+      chat_bubble_icon: chatbot?.chat_bubble_icon || "",
+      accent_colour: chatbot?.accent_colour || "#6366f1",
+      subheading: chatbot?.subheading || "Our bot answers instantly",
+      welcome_message:
+        chatbot?.welcome_message || "Hey there, how can I help you?",
+      input_box_placeholder:
+        chatbot?.input_box_placeholder || "Send a message...",
+      botsonic_branding_on_the_widget:
+        chatbot?.botsonic_branding_on_the_widget || "show",
+      widget_position: chatbot?.widget_position || "right",
+      show_sources_with_the_response:
+        chatbot?.show_sources_with_the_response || "show",
+      post_chat_feedback: chatbot?.post_chat_feedback || "show",
+      widget: chatbot?.widget || "open",
+      show_floating_welcome_message:
+        chatbot?.show_floating_welcome_message || false,
+      show_floating_starter_questions:
+        chatbot?.show_floating_starter_questions || false
     });
   };
 
@@ -80,6 +99,7 @@ const Settings = ({ user }: any) => {
       if (res.status === 200) {
         toast.success("bot appearance created");
         setLoading(false);
+        if (chatbot) return;
         handleReset();
       }
     } catch (error: any) {
@@ -87,6 +107,25 @@ const Settings = ({ user }: any) => {
       setLoading(false);
     }
   };
+
+  const Chat_Bubble_Icons = [
+    {
+      label: "LiaRobotSolid",
+      icon: () => <LiaRobotSolid className="text-2xl" />
+    },
+    { label: "BsRobot", icon: () => <BsRobot className="text-2xl" /> },
+    { label: "BiSupport", icon: () => <BiSupport className="text-2xl" /> },
+    {
+      label: "MdChatBubbleOutline",
+      icon: () => <MdChatBubbleOutline className="text-2xl" />
+    },
+    {
+      label: "MdSupportAgent",
+      icon: () => <MdSupportAgent className="text-2xl" />
+    },
+    { label: "SlSupport", icon: () => <SlSupport className="text-2xl" /> },
+    { label: "SiProbot", icon: () => <SiProbot className="text-2xl" /> }
+  ];
 
   return (
     <div
@@ -120,7 +159,7 @@ const Settings = ({ user }: any) => {
           value="appearance"
           className="flex h-full flex-col space-y-4 overflow-hidden"
         >
-          <div className="w-full h-full flex flex-col space-y-4 overflow-y-scroll">
+          <div className="w-full h-full flex flex-col space-y-4 overflow-y-scroll scrollbar-hide">
             <div className="flex flex-col w-full min-h-fit space-y-1">
               <Label className="text-base font-semibold">Appearance</Label>
               <Label className="text-sm font-normal text-gray-400">
@@ -245,12 +284,29 @@ const Settings = ({ user }: any) => {
                     <Info width={10} height={10} />
                   </ActionTooltip>
                 </Label>
-                <FileUpload
-                  onChange={setform}
-                  endpoint="chatbot"
-                  customKey="chat_bubble_icon"
-                  value={form?.chat_bubble_icon}
-                />
+                <div className="flex items-center space-x-2 w-full">
+                  {Chat_Bubble_Icons.map((item: any, index: number) => (
+                    <Button
+                      key={index}
+                      onClick={() => {
+                        setform((prev) => ({
+                          ...prev,
+                          chat_bubble_icon: item?.label
+                        }));
+                      }}
+                      variant="outline"
+                      className={cn(
+                        "p-2",
+                        chatbot?.chat_bubble_icon === item?.label ||
+                          form?.chat_bubble_icon === item?.label
+                          ? "border-indigo-500"
+                          : null
+                      )}
+                    >
+                      {item?.icon()}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="flex items-center w-full space-x-2">

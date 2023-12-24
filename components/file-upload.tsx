@@ -27,7 +27,12 @@ export const FileUpload = ({
       <div className="relative h-20 w-20">
         <Image fill src={value} alt="Upload" className="rounded-full" />
         <button
-          onClick={() => onChange("")}
+          onClick={() =>
+            onChange((prev: any) => ({
+              ...prev,
+              [customKey]: ""
+            }))
+          }
           className="bg-rose-500 text-white p-1 rounded-full absolute top-0 right-0 shadow-sm"
           type="button"
         >
@@ -50,7 +55,12 @@ export const FileUpload = ({
           {value}
         </a>
         <button
-          onClick={() => onChange("")}
+          onClick={() =>
+            onChange((prev: any) => ({
+              ...prev,
+              [customKey]: ""
+            }))
+          }
           className="bg-rose-500 text-white p-1 rounded-full absolute -top-2 -right-2 shadow-sm"
           type="button"
         >
