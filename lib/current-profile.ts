@@ -13,6 +13,9 @@ export const currentProfile = async () => {
     where: {
       userId,
     },
+    include:{
+      chatbots: true
+    }
   });
 
   if (!profile) {

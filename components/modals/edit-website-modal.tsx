@@ -96,7 +96,6 @@ export const EditWebsiteModal = ({ user }: any) => {
         toast.success("Bot Trained");
         form.reset();
         onClose();
-        router.push("/");
       }
       console.log(res);
     } catch (error: any) {
@@ -134,7 +133,7 @@ export const EditWebsiteModal = ({ user }: any) => {
   };
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={handleClose}>
+    <Dialog open={isModalOpen} onOpenChange={() => !isLoading && handleClose()}>
       <DialogContent className="bg-white max-w-fit text-black p-0 max-h-screen overflow-hidden flex flex-col">
         <DialogHeader className="pt-2 px-6">
           <DialogTitle className="text-2xl text-center font-bold">

@@ -1,70 +1,70 @@
-'use client';
+"use client";
 
-import axios from 'axios';
-import * as z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import axios from "axios";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  DialogTitle
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Input } from '@/components/ui/input';
-import toast from 'react-hot-toast';
-import { useModal } from '@/hooks/use-modal-store';
-import { Label } from '../ui/label';
-import { ScrollArea } from '../ui/scroll-area';
-import { Separator } from '../ui/separator';
-import { Checkbox } from '../ui/checkbox';
-import { cn } from '@/lib/utils';
+  FormMessage
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import toast from "react-hot-toast";
+import { useModal } from "@/hooks/use-modal-store";
+import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
+import { Checkbox } from "../ui/checkbox";
+import { cn } from "@/lib/utils";
 
 export const WebsiteModal = ({ user }: any) => {
   const { isOpen, onClose, type } = useModal();
 
-  const isModalOpen = isOpen && type === 'website';
+  const isModalOpen = isOpen && type === "website";
 
   const router = useRouter();
 
   const formSchema = z.object({
     websiteURL: z.string().min(1, {
-      message: 'WEBSITE NAME is required.',
+      message: "WEBSITE NAME is required."
     }),
     chatbotName: z.string().min(1, {
-      message: 'Chatbot Name is required',
+      message: "Chatbot Name is required"
     }),
     chatbotInstructions: z.string().optional(),
     openAIAPIkey: z.string().min(1, {
-      message: 'OpenAI API key is required',
-    }),
+      message: "OpenAI API key is required"
+    })
   });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      websiteURL: '',
-      chatbotName: '',
-      chatbotInstructions: '',
-      openAIAPIkey: '',
-    },
+      websiteURL: "",
+      chatbotName: "",
+      chatbotInstructions: "",
+      openAIAPIkey: ""
+    }
   });
 
   useEffect(() => {
     if (user) {
-      form.setValue('openAIAPIkey', user.openAIAPIkey);
+      form.setValue("openAIAPIkey", user.openAIAPIkey);
     }
   }, [form, user]);
 
@@ -83,21 +83,20 @@ export const WebsiteModal = ({ user }: any) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let urlCheck = values.websiteURL.charAt(values.websiteURL.length - 1);
 
-    if (urlCheck === '/') {
+    if (urlCheck === "/") {
       let trimUrl = values.websiteURL.slice(0, -1);
       values.websiteURL = trimUrl;
     }
 
     try {
-      const res = await axios.post('/api/createAssistantWithWebsite', {
+      const res = await axios.post("/api/createAssistantWithWebsite", {
         ...values,
-        websiteURLs: selectedUrls,
+        websiteURLs: selectedUrls
       });
       if (res.status === 200) {
-        toast.success('Bot Trained');
+        toast.success("Bot Trained");
         form.reset();
         onClose();
-        router.push('/');
       }
       console.log(res);
     } catch (error: any) {
@@ -105,18 +104,25 @@ export const WebsiteModal = ({ user }: any) => {
     }
   };
 
+  const [fetching, setfetching] = useState(false);
+
   const fetchSublinks = async (mainURL: string) => {
     let urlCheck = mainURL.charAt(mainURL.length - 1);
 
-    if (urlCheck === '/') {
+    if (urlCheck === "/") {
       let trimUrl = mainURL.slice(0, -1);
       mainURL = trimUrl;
     }
-    const res = await axios.post('/api/fetchSublinks', { mainURL: mainURL });
+    setfetching(true);
+    const res = await axios.post("/api/fetchSublinks", { mainURL: mainURL });
 
     if (res.status === 200) {
-      toast.success('Sublinks Fetched');
+      toast.success("Sublinks Fetched");
       setUrls(res.data);
+      setfetching(false);
+    } else {
+      toast.error("Failed to fetch sublinks");
+      setfetching(false);
     }
   };
 
@@ -125,7 +131,7 @@ export const WebsiteModal = ({ user }: any) => {
       if (prevSelectedUrls.includes(url)) {
         // If URL is already in the array, remove it
         return prevSelectedUrls.filter(
-          (selectedUrl: any) => selectedUrl !== url,
+          (selectedUrl: any) => selectedUrl !== url
         );
       } else {
         // If URL is not in the array, add it
@@ -135,8 +141,8 @@ export const WebsiteModal = ({ user }: any) => {
   };
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-white max-w-fit text-black p-0 max-h-screen overflow-hidden flex flex-col">
+    <Dialog open={isModalOpen} onOpenChange={() => !isLoading && handleClose()}>
+      <DialogContent className="bg-white max-w-[80vw] w-full text-black p-0 max-h-screen overflow-hidden flex flex-col">
         <DialogHeader className="pt-2 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
             Add your Website URL
@@ -166,21 +172,24 @@ export const WebsiteModal = ({ user }: any) => {
                             {...field}
                           />
                         </FormControl>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          onClick={() => fetchSublinks(field.value)}
-                        >
-                          Fetch
-                        </Button>
+                        {urls?.length === 0 && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            disabled={fetching}
+                            onClick={() => fetchSublinks(field.value)}
+                          >
+                            Fetch
+                          </Button>
+                        )}
                       </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex items-start justify-center">
-                <div className="space-y-2 px-2 max-h-full w-full flex flex-col">
+              <div className="flex w-full items-start justify-center">
+                <div className="space-y-2 w-1/2 flex-1 px-2 max-h-full flex flex-col">
                   <FormField
                     control={form.control}
                     name="chatbotName"
@@ -245,29 +254,26 @@ export const WebsiteModal = ({ user }: any) => {
                   />
                 </div>
                 {urls.length > 0 && (
-                  <div className="border-l p-2 w-fit space-y-2 flex flex-col">
+                  <div className="border-l p-2 w-1/2 space-y-2 flex flex-col">
                     <Label className="uppercase text-xs text-center w-full whitespace-nowrap font-bold text-zinc-500 dark:text-secondary/70">
                       Choose The URLs
                     </Label>
                     <Separator />
-                    <ScrollArea className="h-48 w-fit rounded-md border">
+                    <ScrollArea className="h-48 w-full rounded-md border">
                       {urls.map((url: string, i: number) => (
                         <div key={i}>
-                          <div className="flex py-1 px-2 w-fit items-center space-x-2">
+                          <div className="flex py-1 px-2 w-full items-center space-x-2">
                             <Checkbox
                               id={`checkbox-${i}`}
                               onCheckedChange={() => handleCheckboxClick(url)}
                               // checked={selectedUrls.includes(url)}
                             />
-                            <Label
-                              htmlFor={`checkbox-${i}`}
-                              className="whitespace-nowrap"
-                            >
+                            <Label htmlFor={`checkbox-${i}`} className="w-full">
                               {url}
                             </Label>
                           </div>
                           <Separator
-                            className={cn(urls.length - 1 === i && 'hidden')}
+                            className={cn(urls.length - 1 === i && "hidden")}
                           />
                         </div>
                       ))}
@@ -278,11 +284,11 @@ export const WebsiteModal = ({ user }: any) => {
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-2">
               <Button
-                className={cn(selectedUrls.length === 0 && 'hidden')}
+                className={cn(selectedUrls.length === 0 && "hidden")}
                 variant="primary"
                 disabled={isLoading}
               >
-                {isLoading ? 'Training Bot...' : 'Train bot'}
+                {isLoading ? "Training Bot..." : "Train bot"}
               </Button>
             </DialogFooter>
           </form>

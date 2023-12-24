@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  ignoreBuildErrors: true
+  images: {
+    domains: ["uploadthing.com", "utfs.io"]
+  }
 };
 
 module.exports = nextConfig;

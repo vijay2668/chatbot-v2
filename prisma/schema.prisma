@@ -14,5 +14,37 @@ model Profile {
 
   openAIAPIkey String?
 
+  chatbots Chatbot[]
+
   createdAt DateTime @default(now())
+}
+
+model Chatbot {
+  id                              String  @id @default(auto()) @map("_id") @db.ObjectId
+  bot_id                          String
+  bot_name                        String
+  company_name                    String
+  description                     String?
+  company_logo                    String
+  bot_avatar                      String?
+  chat_bubble_icon                String
+  accent_colour                   String
+  subheading                      String
+  welcome_message                 String
+  input_box_placeholder           String
+  botsonic_branding_on_the_widget String
+  widget_position                 String
+  show_sources_with_the_response  String
+  post_chat_feedback              String
+  widget                          String
+  show_floating_welcome_message   Boolean
+  show_floating_starter_questions Boolean
+
+  profileId String  @db.ObjectId
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([profileId])
 }

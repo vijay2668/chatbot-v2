@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import axios from 'axios';
-import * as z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import axios from "axios";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 import {
   Dialog,
@@ -11,53 +11,53 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  DialogTitle
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
-import toast from 'react-hot-toast';
-import { useModal } from '@/hooks/use-modal-store';
-import { useEffect } from 'react';
+  FormMessage
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import toast from "react-hot-toast";
+import { useModal } from "@/hooks/use-modal-store";
+import { useEffect } from "react";
 
 export const FileUploadModal = ({ user }: any) => {
   const { isOpen, onClose, type } = useModal();
 
-  const isModalOpen = isOpen && type === 'file';
+  const isModalOpen = isOpen && type === "file";
   const router = useRouter();
 
   const formSchema = z.object({
     files: z.any(),
     chatbotName: z.string().min(1, {
-      message: 'Chatbot Name is required',
+      message: "Chatbot Name is required"
     }),
     chatbotInstructions: z.string().optional(),
     openAIAPIkey: z.string().min(1, {
-      message: 'OpenAI API key is required',
-    }),
+      message: "OpenAI API key is required"
+    })
   });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       files: [],
-      chatbotName: '',
-      chatbotInstructions: '',
-      openAIAPIkey: '',
-    },
+      chatbotName: "",
+      chatbotInstructions: "",
+      openAIAPIkey: ""
+    }
   });
 
   useEffect(() => {
     if (user) {
-      form.setValue('openAIAPIkey', user.openAIAPIkey);
+      form.setValue("openAIAPIkey", user.openAIAPIkey);
     }
   }, [form, user]);
 
@@ -73,41 +73,40 @@ export const FileUploadModal = ({ user }: any) => {
       const { files, openAIAPIkey, chatbotName, chatbotInstructions } = values;
 
       if (files.length === 0) {
-        toast.error('At least one file is required');
+        toast.error("At least one file is required");
         return;
       }
 
       const formData = new FormData();
       for (let file of files) {
-        formData.append('files', file);
+        formData.append("files", file);
       }
 
-      formData.append('chatbotName', chatbotName);
-      formData.append('chatbotInstructions', chatbotInstructions || '');
-      formData.append('openAIAPIkey', openAIAPIkey);
+      formData.append("chatbotName", chatbotName);
+      formData.append("chatbotInstructions", chatbotInstructions || "");
+      formData.append("openAIAPIkey", openAIAPIkey);
 
       const response = await axios.post(
-        '/api/createAssistantWithFiles',
+        "/api/createAssistantWithFiles",
         formData,
         {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        },
+          headers: { "Content-Type": "multipart/form-data" }
+        }
       );
 
       console.log(response);
       if (response.status === 200) {
-        toast.success('Assistant Created');
+        toast.success("Assistant Created");
         form.reset();
         onClose();
-        router.push('/');
       }
     } catch (error: any) {
-      toast.error(error.message || 'An error occurred');
+      toast.error(error.message || "An error occurred");
     }
   };
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={handleClose}>
+    <Dialog open={isModalOpen} onOpenChange={() => !isLoading && handleClose()}>
       <DialogContent className="bg-white text-black p-0 max-h-screen overflow-hidden flex flex-col">
         <DialogHeader className="pt-2 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
@@ -140,7 +139,7 @@ export const FileUploadModal = ({ user }: any) => {
                           className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
                           placeholder="attach your files"
                           onChange={(e: any) => {
-                            form.setValue('files', e.target.files);
+                            form.setValue("files", e.target.files);
                           }}
                           name={field.name}
                         />
@@ -215,7 +214,7 @@ export const FileUploadModal = ({ user }: any) => {
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-2">
               <Button variant="primary" disabled={isLoading}>
-                {isLoading ? 'Training Bot...' : 'Train bot'}
+                {isLoading ? "Training Bot..." : "Train bot"}
               </Button>
             </DialogFooter>
           </form>

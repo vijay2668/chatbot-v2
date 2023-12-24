@@ -1,12 +1,12 @@
-import { ChatBot } from "@/components/chatbot";
-import { createThread, getAssistants } from "@/lib/OpenAI";
 import { currentProfile } from "@/lib/current-profile";
-import axios from "axios";
+import { redirect } from "next/navigation";
 
 const Home = async () => {
   const profile = await currentProfile();
 
-  return <ChatBot user={profile}/>;
+  if (profile) {
+    redirect("/dashboard");
+  }
 };
 
 export default Home;

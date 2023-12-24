@@ -103,7 +103,6 @@ export const EditFileUploadModal = ({ user }: any) => {
         toast.success('Assistant Updated');
         form.reset();
         onClose();
-        router.push('/');
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred');
@@ -111,7 +110,7 @@ export const EditFileUploadModal = ({ user }: any) => {
   };
 
   return (
-    <Dialog open={isModalOpen} onOpenChange={handleClose}>
+    <Dialog open={isModalOpen} onOpenChange={() => !isLoading && handleClose()}>
       <DialogContent className="bg-white text-black p-0 max-h-screen overflow-hidden flex flex-col">
         <DialogHeader className="pt-2 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
