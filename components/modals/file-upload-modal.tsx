@@ -27,12 +27,13 @@ import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import { useModal } from "@/hooks/use-modal-store";
 import { useEffect } from "react";
+import { Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const FileUploadModal = ({ user }: any) => {
   const { isOpen, onClose, type } = useModal();
 
   const isModalOpen = isOpen && type === "file";
-  const router = useRouter();
 
   const formSchema = z.object({
     files: z.any(),
@@ -62,13 +63,20 @@ export const FileUploadModal = ({ user }: any) => {
   }, [form, user]);
 
   const handleClose = () => {
-    form.reset();
+    if (user?.openAIAPIkey) {
+      form.setValue("files", []);
+      form.setValue("chatbotName", "");
+      form.setValue("chatbotInstructions", "");
+    } else {
+      form.reset();
+    }
     onClose();
   };
 
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (hide) return;
     try {
       const { files, openAIAPIkey, chatbotName, chatbotInstructions } = values;
 
@@ -104,7 +112,7 @@ export const FileUploadModal = ({ user }: any) => {
           description: "",
           company_logo: "",
           bot_avatar: "",
-          chat_bubble_icon: "",
+          chat_bubble_icon: "BiSupport",
           accent_colour: "#6366f1",
           subheading: "Our bot answers instantly",
           welcome_message: "Hey there, how can I help you?",
@@ -121,9 +129,17 @@ export const FileUploadModal = ({ user }: any) => {
         const createUI = await axios.post("/api/createChatbotUI", bot_ui_data);
 
         if (createUI) {
-          toast.success("Your Bot Created");
-          form.reset();
-          onClose();
+          toast(() => (
+            <div>
+              <div className="flex items-center space-x-2">
+                <Info width={20} height={20} className="text-indigo-500" />
+                Your Bot is Created
+              </div>
+              <br />
+              <p>Give the Bot few minutes to be trained!</p>
+            </div>
+          ));
+          handleClose();
           console.log(response);
         }
       }
@@ -131,6 +147,14 @@ export const FileUploadModal = ({ user }: any) => {
       toast.error(error.message || "An error occurred");
     }
   };
+
+  const hide =
+    form.getValues().files.length === 0 ||
+    !form.getValues().files ||
+    form.getValues().chatbotName === "" ||
+    !form.getValues().chatbotName ||
+    form.getValues().openAIAPIkey === "" ||
+    !form.getValues().openAIAPIkey;
 
   return (
     <Dialog open={isModalOpen} onOpenChange={() => !isLoading && handleClose()}>
@@ -148,13 +172,17 @@ export const FileUploadModal = ({ user }: any) => {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-2 max-h-full overflow-hidden flex flex-col"
           >
-            <div className="space-y-2 px-6 overflow-y-scroll max-h-full flex flex-col">
-              <div className="flex items-center justify-center text-center">
+            <div className="space-y-2 px-6 overflow-y-scroll scrollbar-hide max-h-full flex flex-col">
+              <div className="flex items-center justify-start w-full">
                 <FormField
                   control={form.control}
                   name="files"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        PDF Files
+                      </FormLabel>
+                      <span className="text-red-600 text-lg">*</span>
                       <FormControl>
                         <Input
                           type="file"
@@ -179,68 +207,86 @@ export const FileUploadModal = ({ user }: any) => {
               <FormField
                 control={form.control}
                 name="chatbotName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                      Chatbot Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                        placeholder="Enter Chatbot Name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  delete field.disabled;
+                  return (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Chatbot Name
+                      </FormLabel>
+                      <span className="text-red-600 text-lg">*</span>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter Chatbot Name"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={form.control}
                 name="chatbotInstructions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                      Chatbot Instructions
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                        placeholder="Enter Chatbot Instructions"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  delete field.disabled;
+                  return (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Chatbot Instructions
+                      </FormLabel>
+                      <span className="text-xs font-bold text-zinc-500">
+                        {" "}
+                        (Optional)
+                      </span>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter Chatbot Instructions (Optional)"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
                 control={form.control}
                 name="openAIAPIkey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                      OpenAI API Key
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        readOnly={user?.openAIAPIkey}
-                        disabled={isLoading}
-                        className="bg-zinc-300/50 read-only:text-black/70 read-only:bg-zinc-300/30 read-only:cursor-not-allowed border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                        placeholder="Enter OpenAI API Key"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  delete field.disabled;
+                  return (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        OpenAI API Key
+                      </FormLabel>
+                      <span className="text-red-600 text-lg">*</span>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading || user?.openAIAPIkey}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter OpenAI API Key"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-2">
-              <Button variant="primary" disabled={isLoading}>
+              <Button
+                className={cn(hide && "hidden")}
+                variant="primary"
+                disabled={isLoading}
+              >
                 {isLoading ? "Training Bot..." : "Train bot"}
               </Button>
             </DialogFooter>

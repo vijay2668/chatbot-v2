@@ -25,11 +25,12 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "./ui/label";
+import { usePathname } from "next/navigation";
 
 export const Sidebar = () => {
   const { onOpen } = useModal();
   const [pop, setpop] = useState(false);
-
+  const path = usePathname();
   const items = [
     {
       label: "File",
@@ -133,10 +134,13 @@ export const Sidebar = () => {
           <Label className="text-xs not-italic font-bold leading-4 tracking-[0.48px] uppercase text-gray-500 p-3">
             Menu
           </Label>
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-col flex-1 space-y-1">
             <Link
               href="/dashboard"
-              className="flex items-center space-x-2 text-white rounded-lg p-3 mx-4 hover:bg-gray-800"
+              className={cn(
+                path === "/dashboard" && "bg-gray-800",
+                "flex items-center space-x-2 text-white rounded-lg p-3 mx-4 hover:bg-gray-800"
+              )}
             >
               <LayoutDashboard
                 className="text-gray-200"
@@ -147,7 +151,10 @@ export const Sidebar = () => {
             </Link>
             <Link
               href="/chatbots"
-              className="flex items-center space-x-2 text-white rounded-lg p-3 mx-4 hover:bg-gray-800"
+              className={cn(
+                path === "/chatbots" && "bg-gray-800",
+                "flex items-center space-x-2 text-white rounded-lg p-3 mx-4 hover:bg-gray-800"
+              )}
             >
               <List className="text-gray-200" width={18} height={18} />
               <Label className="leading-5 cursor-pointer">Your Bots</Label>

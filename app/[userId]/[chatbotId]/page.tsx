@@ -38,6 +38,8 @@ const ChatbotPage = () => {
     (item: any) => item.bot_id === params?.chatbotId
   );
 
+  console.log(params?.chatbotId)
+
   useEffect(() => {
     if (params?.userId) {
       const fetch = async () => {
@@ -177,6 +179,8 @@ const ChatbotPage = () => {
       icon: () => <SiProbot className="text-xs" />
     }
   ];
+
+
 
   const filteredIcon: any = Chat_Bubble_Icons.find(
     (item) => item?.label === chatbotUI?.chat_bubble_icon

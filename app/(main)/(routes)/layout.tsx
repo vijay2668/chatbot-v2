@@ -1,4 +1,3 @@
-import { ChatbotDemoPage } from "@/components/chatbot-demo";
 import { DashboardHeader } from "@/components/header";
 import { ModalProvider } from "@/components/modal-provider";
 import { Sidebar } from "@/components/sidebar";
@@ -16,7 +15,6 @@ const MainLayout: any = async ({ children }: { children: React.ReactNode }) => {
           {children}
         </div>
       </div>
-      {/* <ChatbotDemoPage user={profile}/> */}
       {/* <iframe
         className="absolute bottom-5 right-5 w-full h-[80vh] rounded-xl sm:max-w-[400px]"
         frameBorder="0"

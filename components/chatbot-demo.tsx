@@ -10,14 +10,15 @@ import { Separator } from "./ui/separator";
 import LoadingDots from "./LoadingDots";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { X } from "lucide-react";
+import { User, X } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
-
-// Add typings for props and state
-interface ChatbotDemoPageProps {
-  user: any;
-}
+import { LiaRobotSolid } from "react-icons/lia";
+import { BsRobot } from "react-icons/bs";
+import { BiSupport } from "react-icons/bi";
+import { MdChatBubbleOutline, MdSupportAgent } from "react-icons/md";
+import { SlSupport } from "react-icons/sl";
+import { SiProbot } from "react-icons/si";
 
 interface ChatMessage {
   role: string;
@@ -25,9 +26,8 @@ interface ChatMessage {
 }
 
 // Destructure props directly in the function parameters
-export const ChatbotDemoPage: React.FC<ChatbotDemoPageProps> = ({ user }) => {
-  const params = useParams();
-  const [open, setOpen] = useState<boolean>(false);
+export const ChatbotDemoPage = ({ user, params }:any) => {
+  const [open, setOpen] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentChatbot, setCurrentChatbot] = useState<any>(null);
   const [query, setQuery] = useState<string>("");
@@ -135,34 +135,74 @@ export const ChatbotDemoPage: React.FC<ChatbotDemoPageProps> = ({ user }) => {
     // }
   }, [chatbotUI?.welcome_message]);
 
+  const Chat_Bubble_Icons = [
+    {
+      label: "LiaRobotSolid",
+      icon: () => <LiaRobotSolid className="text-xs" />
+    },
+    {
+      label: "BsRobot",
+      icon: () => <BsRobot className="text-xs" />
+    },
+    {
+      label: "BiSupport",
+      icon: () => <BiSupport className="text-xs" />
+    },
+    {
+      label: "MdChatBubbleOutline",
+      icon: () => <MdChatBubbleOutline className="text-xs" />
+    },
+    {
+      label: "MdSupportAgent",
+      icon: () => <MdSupportAgent className="text-xs" />
+    },
+    {
+      label: "SlSupport",
+      icon: () => <SlSupport className="text-xs" />
+    },
+    {
+      label: "SiProbot",
+      icon: () => <SiProbot className="text-xs" />
+    }
+  ];
+
+
+
+  const filteredIcon: any = Chat_Bubble_Icons.find(
+    (item) => item?.label === chatbotUI?.chat_bubble_icon
+  );
+
+
   if (chatbotUI) {
     return (
-      <div className="absolute max-w-full sm:max-w-[400px] w-full justify-end p-4 h-full items-end flex flex-col space-y-4 right-0">
+      <div className="max-w-full w-full bg-transparent justify-end h-full items-end flex flex-col space-y-4 p-4">
         {open && (
-          <div className="h-full bg-white flex flex-col border rounded-2xl overflow-hidden  w-full">
+          <div className="h-full bg-transparent flex flex-col border rounded-2xl overflow-hidden  w-full">
             <div
               style={{ background: chatbotUI?.accent_colour }}
               className={cn(
-                `rounded-t-2xl flex items-center justify-center  w-full h-2/6`
+                `rounded-t-2xl flex items-center justify-start  w-full h-fit p-4 py-6`
               )}
             >
-              <div className="flex flex-col items-center justify-center space-y-1">
+              <div className="flex items-center justify-center space-x-3">
                 <img
                   alt={chatbotUI?.company_logo}
                   src={chatbotUI?.company_logo}
-                  className="w-16 h-16 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full object-cover"
                 />
-                <Label className="font-semibold text-white text-lg capitalize">
-                  {chatbotUI?.company_name}
-                </Label>
-                <Label className="capitalize text-white/80 text-xs">
-                  {chatbotUI?.subheading}
-                </Label>
+                <div className="flex flex-col">
+                  <Label className="font-semibold text-white text-lg leading-5 capitalize">
+                    {chatbotUI?.company_name}
+                  </Label>
+                  <Label className="capitalize text-white/80 text-xs leading-5">
+                    {chatbotUI?.subheading}
+                  </Label>
+                </div>
               </div>
             </div>
             <div className="flex flex-col overflow-hidden w-full h-full">
               <div className="w-full h-full bg-white flex items-center justify-center overflow-hidden">
-                <div className="w-full h-full flex flex-col overflow-y-scroll">
+                <div className="w-full h-full flex flex-col overflow-y-scroll scrollbar-hide">
                   {messages.map((message: any, index: number) => {
                     let icon;
                     let className;
@@ -170,31 +210,52 @@ export const ChatbotDemoPage: React.FC<ChatbotDemoPageProps> = ({ user }) => {
                     // Determine message sender (bot or user)
                     if (message.role === "bot") {
                       icon = (
-                        <img
-                          key={index}
-                          src={chatbotUI?.bot_avatar}
-                          alt="AI"
-                          className="w-8 h-8 object-fill rounded-full"
-                        />
+                        <div className="p-1 mt-1.5 border border-black rounded-full">
+                          {filteredIcon?.icon()}
+                        </div>
                       );
-                      className = "relative p-4 flex space-x-1";
+                      className =
+                        "relative p-4 flex space-x-1 items-start justify-start";
                     } else {
                       icon = (
-                        <img
-                          key={index}
-                          src="/usericon.png"
-                          alt="AI"
-                          className="w-8 h-8 object-fill rounded-full"
-                        />
+                        <div
+                          style={{
+                            borderColor:
+                              message.role === "user" &&
+                              chatbotUI?.accent_colour
+                          }}
+                          className="p-1 mt-1.5 border rounded-full"
+                        >
+                          <User
+                            style={{
+                              color:
+                                message.role === "user" &&
+                                chatbotUI?.accent_colour
+                            }}
+                            width={12}
+                            height={12}
+                          />
+                        </div>
                       );
                       // The latest message sent by the user will be animated while waiting for a response
-                      className = "relative p-4 flex space-x-1";
+                      className =
+                        "relative p-4 flex items-start justify-end space-x-1";
                     }
 
                     return (
                       <div key={`chatMessage-${index}`} className={className}>
                         {icon}
-                        <div className="text-sm p-2 px-3 bg-gray-100 rounded-xl">
+                        <div
+                          style={{
+                            background:
+                              message.role === "user" &&
+                              chatbotUI?.accent_colour
+                          }}
+                          className={cn(
+                            message.role === "user" && "text-white",
+                            "text-sm p-2 px-2 bg-gray-100 shadow-md max-w-[250px] rounded-xl"
+                          )}
+                        >
                           <ReactMarkdown>{message.message}</ReactMarkdown>
                         </div>
                       </div>
@@ -207,6 +268,7 @@ export const ChatbotDemoPage: React.FC<ChatbotDemoPageProps> = ({ user }) => {
                 <Input
                   disabled={loading}
                   autoFocus={true}
+                  onKeyDown={handleEnter}
                   id="userInput"
                   name="userInput"
                   placeholder={
@@ -221,11 +283,14 @@ export const ChatbotDemoPage: React.FC<ChatbotDemoPageProps> = ({ user }) => {
                 <button
                   type="submit" // Set type to "submit"
                   disabled={loading}
+                  style={{
+                    color: chatbotUI?.accent_colour
+                  }}
                   className="text-gray-400 relative h-full min-w-[30px] flex items-center justify-start"
                 >
                   {loading ? (
                     <div className="flex items-center w-full h-full justify-start">
-                      <LoadingDots color="#000" />
+                      <LoadingDots color={chatbotUI?.accent_colour} />
                     </div>
                   ) : (
                     <svg
@@ -241,7 +306,7 @@ export const ChatbotDemoPage: React.FC<ChatbotDemoPageProps> = ({ user }) => {
             </div>
           </div>
         )}
-        <Button
+        {/* <Button
           onClick={() => setOpen(!open)}
           style={{ background: chatbotUI?.accent_colour }}
           className="rounded-full p-2 h-fit"
@@ -255,7 +320,7 @@ export const ChatbotDemoPage: React.FC<ChatbotDemoPageProps> = ({ user }) => {
               className="w-8 h-8 object-fill"
             />
           )}
-        </Button>
+        </Button> */}
       </div>
     );
   }

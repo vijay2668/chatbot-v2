@@ -44,9 +44,15 @@ export async function POST(req: Request) {
 
     console.log("step 2:", fileIDs);
 
+    const default_prompt =
+      "You are a helpful customer support chatbot. You are able to answer questions about the website and it's context. You are also able to answer questions about the website. Refuse any answer that does not have to do with the website or its content. Provide short, concise answers.";
+
     const assistant = await createAssistant({
       chatbotName,
-      chatbotInstructions,
+      chatbotInstructions:
+        !chatbotInstructions || chatbotInstructions === ""
+          ? default_prompt
+          : chatbotInstructions,
       fileIDs,
       openAIAPIkey
     });

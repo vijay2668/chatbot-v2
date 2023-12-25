@@ -31,6 +31,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
+import { Plus, X } from "lucide-react";
 
 export const EditWebsiteModal = ({ user }: any) => {
   const { isOpen, onClose, type, data } = useModal();
@@ -60,30 +61,31 @@ export const EditWebsiteModal = ({ user }: any) => {
 
   useEffect(() => {
     if (data) {
-      form.setValue('chatbotName', data.name);
-      form.setValue('chatbotInstructions', data.instructions);
+      form.setValue("chatbotName", data.name);
+      form.setValue("chatbotInstructions", data.instructions);
     }
   }, [data, form]);
 
-  const [urls, setUrls] = useState([]);
+  const [urls, setUrls] = useState<any>([]);
   const [selectedUrls, setSelectedUrls] = useState([]);
 
   const handleClose = () => {
     form.reset();
-    onClose();
+    setInput("");
+    setOpen(false);
     setUrls([]);
     setSelectedUrls([]);
+    onClose();
   };
 
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    let urlCheck = values.websiteURL.charAt(values.websiteURL.length - 1);
+    if (hide) return;
+    const trimTrailingSlash = (url: string) =>
+      url.endsWith("/") ? url.slice(0, -1) : url;
 
-    if (urlCheck === "/") {
-      let trimUrl = values.websiteURL.slice(0, -1);
-      values.websiteURL = trimUrl;
-    }
+    values.websiteURL = trimTrailingSlash(values.websiteURL);
 
     try {
       const res = await axios.post("/api/updateAssistantWithWebsite", {
@@ -103,18 +105,29 @@ export const EditWebsiteModal = ({ user }: any) => {
     }
   };
 
-  const fetchSublinks = async (mainURL: string) => {
-    let urlCheck = mainURL.charAt(mainURL.length - 1);
+  const [fetching, setfetching] = useState(false);
 
-    if (urlCheck === "/") {
-      let trimUrl = mainURL.slice(0, -1);
-      mainURL = trimUrl;
-    }
-    const res = await axios.post("/api/fetchSublinks", { mainURL: mainURL });
+  const fetchSublinks = async (mainURL: string) => {
+    const trimTrailingSlash = (url: string) =>
+      url.endsWith("/") ? url.slice(0, -1) : url;
+
+    const trimedSlash = trimTrailingSlash(mainURL);
+
+    const trimHTTPS = (url: string) =>
+      url.startsWith("https://") ? url.slice(8) : url;
+
+    const trimed = trimHTTPS(trimedSlash);
+
+    setfetching(true);
+    const res = await axios.post("/api/fetchSublinks", { mainURL: trimed });
 
     if (res.status === 200) {
       toast.success("Sublinks Fetched");
       setUrls(res.data);
+      setfetching(false);
+    } else {
+      toast.error("Failed to fetch sublinks");
+      setfetching(false);
     }
   };
 
@@ -132,9 +145,19 @@ export const EditWebsiteModal = ({ user }: any) => {
     });
   };
 
+  const hide =
+    selectedUrls.length === 0 ||
+    form.getValues().chatbotName === "" ||
+    !form.getValues().chatbotName ||
+    form.getValues().chatbotInstructions === "" ||
+    !form.getValues().chatbotInstructions;
+
+  const [input, setInput] = useState("");
+  const [open, setOpen] = useState(false);
+
   return (
     <Dialog open={isModalOpen} onOpenChange={() => !isLoading && handleClose()}>
-      <DialogContent className="bg-white max-w-fit text-black p-0 max-h-screen overflow-hidden flex flex-col">
+      <DialogContent className="bg-white max-w-[80vw] w-full text-black p-0 max-h-screen overflow-hidden flex flex-col">
         <DialogHeader className="pt-2 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
             Add your Website URL
@@ -146,115 +169,188 @@ export const EditWebsiteModal = ({ user }: any) => {
             className="space-y-2 max-h-full overflow-hidden flex flex-col"
           >
             <div className="space-y-2 px-6 w-full max-h-full flex flex-col">
-              <div className="flex items-center w-full justify-center text-center">
+              <div className="flex items-center w-full justify-start">
                 <FormField
                   control={form.control}
                   name="websiteURL"
-                  render={({ field }) => (
-                    <FormItem className="w-full px-2">
-                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Website URL
-                      </FormLabel>
-                      <div className="flex items-center space-x-2 w-full">
-                        <FormControl>
-                          <Input
-                            disabled={isLoading}
-                            className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                            placeholder="Enter Website URL"
-                            {...field}
-                          />
-                        </FormControl>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          onClick={() => fetchSublinks(field.value)}
-                        >
-                          Fetch
-                        </Button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    delete field.disabled;
+                    return (
+                      <FormItem className="w-full px-2">
+                        <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                          Website URL
+                        </FormLabel>
+                        <span className="text-red-600 text-lg">*</span>
+                        <div className="flex items-center space-x-2 w-full">
+                          <FormControl>
+                            <Input
+                              disabled={isLoading || fetching}
+                              className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                              placeholder="Enter Website URL"
+                              {...field}
+                            />
+                          </FormControl>
+                          {urls?.length === 0 && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              disabled={fetching}
+                              onClick={() => fetchSublinks(field.value)}
+                            >
+                              Fetch
+                            </Button>
+                          )}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
-              <div className="flex items-start justify-center">
-                <div className="space-y-2 px-2 max-h-full w-full flex flex-col">
+              <div className="flex w-full items-start justify-center">
+                <div className="space-y-2 w-1/2 flex-1 px-2 max-h-full flex flex-col">
                   <FormField
                     control={form.control}
                     name="chatbotName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="uppercase whitespace-nowrap text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                          Chatbot Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            disabled={isLoading}
-                            className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                            placeholder="Enter Chatbot Name"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      delete field.disabled;
+                      return (
+                        <FormItem>
+                          <FormLabel className="uppercase whitespace-nowrap text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                            Chatbot Name
+                          </FormLabel>
+                          <span className="text-red-600 text-lg">*</span>
+                          <FormControl>
+                            <Input
+                              disabled={isLoading}
+                              className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                              placeholder="Enter Chatbot Name"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                   <FormField
                     control={form.control}
                     name="chatbotInstructions"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="uppercase whitespace-nowrap text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                          Chatbot Instructions
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            disabled={isLoading}
-                            className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                            placeholder="Enter Chatbot Instructions"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      delete field.disabled;
+                      return (
+                        <FormItem>
+                          <FormLabel className="uppercase whitespace-nowrap text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                            Chatbot Instructions
+                          </FormLabel>
+                          <span className="text-xs font-bold text-zinc-500">
+                            {" "}
+                            (Optional)
+                          </span>
+                          <FormControl>
+                            <Input
+                              disabled={isLoading}
+                              className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                              placeholder="Enter Chatbot Instructions (Optional)"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </div>
-                {urls.length > 0 && (
-                  <div className="border-l p-2 w-fit space-y-2 flex flex-col">
-                    <Label className="uppercase text-xs text-center w-full whitespace-nowrap font-bold text-zinc-500 dark:text-secondary/70">
-                      Choose The URLs
-                    </Label>
-                    <Separator />
-                    <ScrollArea className="h-48 w-fit rounded-md border">
-                      {urls.map((url: string, i: number) => (
-                        <div key={i}>
-                          <div className="flex py-1 px-2 w-fit items-center space-x-2">
-                            <Checkbox
-                              id={`checkbox-${i}`}
-                              onCheckedChange={() => handleCheckboxClick(url)}
-                              // checked={selectedUrls.includes(url)}
-                            />
-                            <Label
-                              htmlFor={`checkbox-${i}`}
-                              className="whitespace-nowrap"
-                            >
-                              {url}
-                            </Label>
-                          </div>
-                          <Separator
-                            className={cn(urls.length - 1 === i && "hidden")}
+
+                <div className="border-l p-2 w-1/2 space-y-2 flex flex-col">
+                  <Label className="uppercase text-xs w-full whitespace-nowrap font-bold text-zinc-500 dark:text-secondary/70">
+                    Choose The URLs and you can also{" "}
+                    <Button
+                      type="button"
+                      onClick={() => setOpen(!open)}
+                      variant="link"
+                      className="p-0 text-indigo-500 h-fit"
+                    >
+                      Add
+                    </Button>{" "}
+                    Urls
+                  </Label>
+                  {open && (
+                    <div className="flex items-center space-x-1">
+                      <Input
+                        onChange={(e) => setInput(e.target.value)}
+                        value={input}
+                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                        placeholder="Enter URL"
+                      />
+                      <div
+                        onClick={() => {
+                          if (!input) {
+                            toast.error("URL is required");
+                            return;
+                          }
+                          const trimTrailingSlash = (url: string) =>
+                            url.endsWith("/") ? url.slice(0, -1) : url;
+                          const trimed = trimTrailingSlash(input);
+
+                          if (urls.includes(trimed)) {
+                            toast.error("This URL is Already exist");
+                          } else {
+                            setUrls((prev: any) => [...prev, trimed]);
+                            setInput("");
+                          }
+                        }}
+                        className="min-w-[40px] h-10 transition-all flex items-center justify-center cursor-pointer rounded-lg hover:bg-indigo-50"
+                      >
+                        <Plus width={16} height={16} />
+                      </div>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="h-48 w-full overflow-x-hidden overflow-y-scroll scrollbar-hide flex flex-col rounded-md border">
+                    {urls?.map((url: string, i: number) => (
+                      <>
+                        <div
+                          key={i}
+                          className="flex py-1 px-2 min-h-[40px] min-w-full items-center overflow-x-hidden space-x-2"
+                        >
+                          <Checkbox
+                            id={`checkbox-${i}`}
+                            onCheckedChange={() => handleCheckboxClick(url)}
+                            // checked={selectedUrls.includes(url)}
                           />
+                          <Label
+                            htmlFor={`checkbox-${i}`}
+                            className="w-full cursor-pointer leading-8 overflow-hidden flex flex-col"
+                          >
+                            <p className="whitespace-nowrap overflow-x-scroll overflow-y-hidden scrollbar-hide">
+                              {url}
+                            </p>
+                          </Label>
+                          <div
+                            onClick={() => {
+                              const filter = urls.filter(
+                                (ex: string) => ex !== url
+                              );
+                              setUrls(filter);
+                            }}
+                            className="text-red-600 p-1 hover:bg-red-100 cursor-pointer rounded-md"
+                          >
+                            <X width={16} height={16} />
+                          </div>
                         </div>
-                      ))}
-                    </ScrollArea>
+                        <Separator
+                          className={cn(urls.length - 1 === i && "hidden")}
+                        />
+                      </>
+                    ))}
                   </div>
-                )}
+                </div>
               </div>
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-2">
               <Button
-                className={cn(selectedUrls.length === 0 && "hidden")}
+                className={cn(hide && "hidden")}
                 variant="primary"
                 disabled={isLoading}
               >

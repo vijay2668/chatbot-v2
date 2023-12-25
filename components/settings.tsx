@@ -40,7 +40,7 @@ const Settings = ({ user }: any) => {
     description: chatbot?.description || "",
     company_logo: chatbot?.company_logo || "",
     bot_avatar: chatbot?.bot_avatar || "",
-    chat_bubble_icon: chatbot?.chat_bubble_icon || "",
+    chat_bubble_icon: chatbot?.chat_bubble_icon || "BiSupport",
     accent_colour: chatbot?.accent_colour || "#6366f1",
     subheading: chatbot?.subheading || "Our bot answers instantly",
     welcome_message:
@@ -69,7 +69,7 @@ const Settings = ({ user }: any) => {
       description: chatbot?.description || "",
       company_logo: chatbot?.company_logo || "",
       bot_avatar: chatbot?.bot_avatar || "",
-      chat_bubble_icon: chatbot?.chat_bubble_icon || "",
+      chat_bubble_icon: chatbot?.chat_bubble_icon || "BiSupport",
       accent_colour: chatbot?.accent_colour || "#6366f1",
       subheading: chatbot?.subheading || "Our bot answers instantly",
       welcome_message:

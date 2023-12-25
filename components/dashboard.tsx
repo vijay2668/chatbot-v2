@@ -39,10 +39,10 @@ export const DashboardPage = ({ user }: any) => {
           >
             <div className="flex items-center gap-3">
               <div className="flex flex-col gap-1">
-                <Label className="text-sm font-semibold text-left whitespace-normal">
+                <Label className="text-sm cursor-pointer font-semibold text-left whitespace-normal">
                   Create a PDF Bot
                 </Label>
-                <Label className="text-xs text-gray-500 whitespace-normal text-left">
+                <Label className="text-xs text-gray-500 cursor-pointer whitespace-normal text-left">
                   Train a custom ChatGPT on your pdf files base
                 </Label>
               </div>
@@ -57,10 +57,10 @@ export const DashboardPage = ({ user }: any) => {
           >
             <div className="flex items-center gap-3">
               <div className="flex flex-col gap-1">
-                <Label className="text-sm font-semibold text-left whitespace-normal">
+                <Label className="text-sm cursor-pointer font-semibold text-left whitespace-normal">
                   Create a Website Bot
                 </Label>
-                <Label className="text-xs text-gray-500 whitespace-normal text-left">
+                <Label className="text-xs cursor-pointer text-gray-500 whitespace-normal text-left">
                   Personalize ChatGPT for your specific Website
                 </Label>
               </div>

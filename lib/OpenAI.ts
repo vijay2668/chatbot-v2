@@ -13,10 +13,7 @@ export const createAssistant = async ({
 
   const assistant = await openai?.beta?.assistants?.create({
     name: chatbotName,
-    instructions:
-      !chatbotInstructions || chatbotInstructions === ""
-        ? "You are a good assistant"
-        : chatbotInstructions,
+    instructions: chatbotInstructions,
     tools: [{ type: "retrieval" }],
     model: "gpt-3.5-turbo-1106",
     file_ids: fileIDs.map((fileID: any) => fileID)

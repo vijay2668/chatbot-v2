@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     // this part fetches the sublinks of main url*
     const sitemap = new Sitemapper({
-      url: `${mainURL}/sitemap.xml`,
+      url: `https://${mainURL}/sitemap.xml`,
     });
     const { sites } = await sitemap.fetch();
 

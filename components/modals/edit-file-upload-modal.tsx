@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import axios from 'axios';
-import * as z from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import axios from "axios";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 import {
   Dialog,
@@ -11,51 +11,54 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  DialogTitle
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
-import toast from 'react-hot-toast';
-import { useModal } from '@/hooks/use-modal-store';
-import { useEffect, useState } from 'react';
-import { Switch } from '../ui/switch';
+  FormMessage
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import toast from "react-hot-toast";
+import { useModal } from "@/hooks/use-modal-store";
+import { useEffect, useState } from "react";
+import { Switch } from "../ui/switch";
+import { cn } from "@/lib/utils";
 
 export const EditFileUploadModal = ({ user }: any) => {
   const { isOpen, data, onClose, type } = useModal();
   const [checked, setChecked] = useState(false);
-  const isModalOpen = isOpen && type === 'editFile';
+  const isModalOpen = isOpen && type === "editFile";
   const router = useRouter();
 
   const formSchema = z.object({
     files: z.any(),
     chatbotName: z.string().min(1, {
-      message: 'Chatbot Name is required',
+      message: "Chatbot Name is required"
     }),
-    chatbotInstructions: z.string().optional(),
+    chatbotInstructions: z.string().min(1, {
+      message: "Chatbot Instructions is required"
+    })
   });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       files: [],
-      chatbotName: '',
-      chatbotInstructions: '',
-    },
+      chatbotName: "",
+      chatbotInstructions: ""
+    }
   });
 
   useEffect(() => {
     if (data) {
-      form.setValue('chatbotName', data.name);
-      form.setValue('chatbotInstructions', data.instructions);
+      form.setValue("chatbotName", data.name);
+      form.setValue("chatbotInstructions", data.instructions);
     }
   }, [data, form]);
 
@@ -67,47 +70,55 @@ export const EditFileUploadModal = ({ user }: any) => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (hide) return;
     try {
       const { files, chatbotName, chatbotInstructions } = values;
 
       if (files.length === 0) {
-        toast.error('At least one file is required');
+        toast.error("At least one file is required");
         return;
       }
 
       const formData = new FormData();
       for (let file of files) {
-        formData.append('files', file);
+        formData.append("files", file);
       }
 
       if (!checked && data?.file_ids) {
         for (let file_id of data?.file_ids) {
-          formData.append('file_ids', file_id);
+          formData.append("file_ids", file_id);
         }
       }
 
-      formData.append('chatbotName', chatbotName);
-      formData.append('chatbotInstructions', chatbotInstructions || '');
-      formData.append('assistantId', data?.id);
+      formData.append("chatbotName", chatbotName);
+      formData.append("chatbotInstructions", chatbotInstructions || "");
+      formData.append("assistantId", data?.id);
 
       const response = await axios.post(
-        '/api/updateAssistantWithFiles',
+        "/api/updateAssistantWithFiles",
         formData,
         {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        },
+          headers: { "Content-Type": "multipart/form-data" }
+        }
       );
 
       console.log(response);
       if (response.status === 200) {
-        toast.success('Assistant Updated');
-        form.reset();
-        onClose();
+        toast.success("Assistant Updated");
+        handleClose();
       }
     } catch (error: any) {
-      toast.error(error.message || 'An error occurred');
+      toast.error(error.message || "An error occurred");
     }
   };
+
+  const hide =
+    form.getValues().files.length === 0 ||
+    !form.getValues().files ||
+    form.getValues().chatbotName === "" ||
+    !form.getValues().chatbotName ||
+    form.getValues().chatbotInstructions === "" ||
+    !form.getValues().chatbotInstructions;
 
   return (
     <Dialog open={isModalOpen} onOpenChange={() => !isLoading && handleClose()}>
@@ -125,13 +136,17 @@ export const EditFileUploadModal = ({ user }: any) => {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-2 max-h-full overflow-hidden flex flex-col"
           >
-            <div className="space-y-2 px-6 overflow-y-scroll max-h-full flex flex-col">
-              <div className="flex items-center justify-center text-center">
+            <div className="space-y-2 px-6 overflow-y-scroll scrollbar-hide max-h-full flex flex-col">
+              <div className="flex items-center justify-start w-full">
                 <FormField
                   control={form.control}
                   name="files"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        PDF Files
+                      </FormLabel>
+                      <span className="text-red-600 text-lg">*</span>
                       <FormControl>
                         <Input
                           type="file"
@@ -143,7 +158,7 @@ export const EditFileUploadModal = ({ user }: any) => {
                           className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
                           placeholder="attach your files"
                           onChange={(e: any) => {
-                            form.setValue('files', e.target.files);
+                            form.setValue("files", e.target.files);
                           }}
                           name={field.name}
                         />
@@ -156,44 +171,51 @@ export const EditFileUploadModal = ({ user }: any) => {
               <FormField
                 control={form.control}
                 name="chatbotName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                      Chatbot Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                        placeholder="Enter Chatbot Name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  delete field.disabled;
+                  return (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Chatbot Name
+                      </FormLabel>
+                      <span className="text-red-600 text-lg">*</span>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter Chatbot Name"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={form.control}
                 name="chatbotInstructions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                      Chatbot Instructions
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                        placeholder="Enter Chatbot Instructions"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  delete field.disabled;
+                  return (
+                    <FormItem>
+                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                        Chatbot Instructions
+                      </FormLabel>
+                      <span className="text-red-600 text-lg">*</span>
+                      <FormControl>
+                        <Input
+                          disabled={isLoading}
+                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                          placeholder="Enter Chatbot Instructions"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
-
               <FormItem className="flex flex-col">
                 <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
                   On - If want to replace with existing data
@@ -202,8 +224,12 @@ export const EditFileUploadModal = ({ user }: any) => {
               </FormItem>
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-2">
-              <Button variant="primary" disabled={isLoading}>
-                {isLoading ? 'Training Bot...' : 'Train bot'}
+              <Button
+                className={cn(hide && "hidden")}
+                variant="primary"
+                disabled={isLoading}
+              >
+                {isLoading ? "Training Bot..." : "Train bot"}
               </Button>
             </DialogFooter>
           </form>
