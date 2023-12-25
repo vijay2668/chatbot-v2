@@ -81,24 +81,49 @@ export const WebsiteModal = ({ user }: any) => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    let urlCheck = values.websiteURL.charAt(values.websiteURL.length - 1);
+    const trimTrailingSlash = (url: string) =>
+      url.endsWith("/") ? url.slice(0, -1) : url;
 
-    if (urlCheck === "/") {
-      let trimUrl = values.websiteURL.slice(0, -1);
-      values.websiteURL = trimUrl;
-    }
+    values.websiteURL = trimTrailingSlash(values.websiteURL);
 
     try {
       const res = await axios.post("/api/createAssistantWithWebsite", {
         ...values,
         websiteURLs: selectedUrls
       });
+
       if (res.status === 200) {
-        toast.success("Bot Trained");
-        form.reset();
-        onClose();
+        const assistant = res?.data?.assistant;
+        const bot_ui_data = {
+          bot_id: assistant?.id,
+          bot_name: "New Bot",
+          company_name: "",
+          description: "",
+          company_logo: "",
+          bot_avatar: "",
+          chat_bubble_icon: "",
+          accent_colour: "#6366f1",
+          subheading: "Our bot answers instantly",
+          welcome_message: "Hey there, how can I help you?",
+          input_box_placeholder: "Send a message...",
+          botsonic_branding_on_the_widget: "show",
+          widget_position: "right",
+          show_sources_with_the_response: "show",
+          post_chat_feedback: "show",
+          widget: "open",
+          show_floating_welcome_message: false,
+          show_floating_starter_questions: false
+        };  
+
+        const createUI = await axios.post("/api/createChatbotUI", bot_ui_data);
+
+        if (createUI) {
+          toast.success("Your Bot Created");
+          form.reset();
+          onClose();
+          console.log(res);
+        }
       }
-      console.log(res);
     } catch (error: any) {
       toast.error(error);
     }

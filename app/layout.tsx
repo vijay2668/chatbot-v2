@@ -15,7 +15,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const profile: any = await currentProfile();
 
   return (
     <ClerkProvider>

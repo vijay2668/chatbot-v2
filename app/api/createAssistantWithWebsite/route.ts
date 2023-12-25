@@ -60,29 +60,6 @@ export async function POST(req: Request) {
       }
     });
 
-    const bot_ui_data = {
-      bot_id: assistant?.id,
-      bot_name: "New Bot",
-      company_name: "",
-      description: "",
-      company_logo: "",
-      bot_avatar: "",
-      chat_bubble_icon: "",
-      accent_colour: "#6366f1",
-      subheading: "Our bot answers instantly",
-      welcome_message: "Hey there, how can I help you?",
-      input_box_placeholder: "Send a message...",
-      botsonic_branding_on_the_widget: "show",
-      widget_position: "right",
-      show_sources_with_the_response: "show",
-      post_chat_feedback: "show",
-      widget: "open",
-      show_floating_welcome_message: false,
-      show_floating_starter_questions: false
-    };
-
-    await axios.post("/api/createChatbotUI", bot_ui_data);
-
     console.log("step 5:", response);
     return NextResponse.json({ response: response, assistant: assistant });
   } catch (error: any) {

@@ -1,6 +1,6 @@
-import { auth } from '@clerk/nextjs';
-import { redirect } from 'next/navigation';
-import { db } from '@/lib/db';
+import { auth } from "@clerk/nextjs";
+
+import { db } from "@/lib/db";
 
 export const currentProfile = async () => {
   const { userId } = auth();
@@ -8,24 +8,12 @@ export const currentProfile = async () => {
   if (!userId) {
     return null;
   }
-  
+
   const profile = await db.profile.findUnique({
     where: {
-      userId,
-    },
-    include:{
-      chatbots: true
+      userId
     }
   });
 
-  if (!profile) {
-    await db.profile.create({
-      data: {
-        userId,
-      },
-    });
-    redirect('/dashboard');
-  }
-
   return profile;
-};
+}
