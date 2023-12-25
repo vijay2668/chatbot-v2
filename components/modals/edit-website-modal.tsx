@@ -31,7 +31,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
-import { Plus, X } from "lucide-react";
+import { Info, Plus, X } from "lucide-react";
 
 export const EditWebsiteModal = ({ user }: any) => {
   const { isOpen, onClose, type, data } = useModal();
@@ -95,9 +95,17 @@ export const EditWebsiteModal = ({ user }: any) => {
         websiteURLs: selectedUrls
       });
       if (res.status === 200) {
-        toast.success("Bot Trained");
-        form.reset();
-        onClose();
+        toast(() => (
+          <div>
+            <div className="flex items-center space-x-2">
+              <Info width={20} height={20} className="text-indigo-500" />
+              Your Bot is Updated
+            </div>
+            <br />
+            <p>Give the Bot few minutes to be trained!</p>
+          </div>
+        ));
+        handleClose();
       }
       console.log(res);
     } catch (error: any) {

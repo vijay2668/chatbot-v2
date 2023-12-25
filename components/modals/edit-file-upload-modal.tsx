@@ -29,6 +29,7 @@ import { useModal } from "@/hooks/use-modal-store";
 import { useEffect, useState } from "react";
 import { Switch } from "../ui/switch";
 import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
 
 export const EditFileUploadModal = ({ user }: any) => {
   const { isOpen, data, onClose, type } = useModal();
@@ -104,7 +105,16 @@ export const EditFileUploadModal = ({ user }: any) => {
 
       console.log(response);
       if (response.status === 200) {
-        toast.success("Assistant Updated");
+        toast(() => (
+          <div>
+            <div className="flex items-center space-x-2">
+              <Info width={20} height={20} className="text-indigo-500" />
+              Your Bot is Updated
+            </div>
+            <br />
+            <p>Give the Bot few minutes to be trained!</p>
+          </div>
+        ));
         handleClose();
       }
     } catch (error: any) {

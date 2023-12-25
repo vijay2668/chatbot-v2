@@ -162,8 +162,22 @@ export const WebsiteModal = ({ user }: any) => {
     const res = await axios.post("/api/fetchSublinks", { mainURL: trimed });
 
     if (res.status === 200) {
-      toast.success("Sublinks Fetched");
-      setUrls(res.data);
+      if (res?.data?.length === 0) {
+        toast(() => (
+          <div>
+            <div className="flex items-center space-x-2">
+              <Info width={20} height={20} className="text-indigo-500" />
+              Unable to Extract Sublinks
+            </div>
+            <br />
+            <p>Can you Please Add some Links of Main URL</p>
+          </div>
+        ));
+        setUrls([trimedSlash]);
+      } else {
+        toast.success("Sublinks Fetched");
+        setUrls(res.data);
+      }
       setfetching(false);
     } else {
       toast.error("Failed to fetch sublinks");
@@ -327,7 +341,7 @@ export const WebsiteModal = ({ user }: any) => {
                   />
                 </div>
                 <div className="border-l p-2 w-1/2 space-y-2 flex flex-col">
-                  <Label className="uppercase text-xs w-full whitespace-nowrap font-bold text-zinc-500 dark:text-secondary/70">
+                  <Label className="uppercase text-xs w-full font-bold text-zinc-500 dark:text-secondary/70">
                     Choose The URLs and you can also{" "}
                     <Button
                       type="button"
