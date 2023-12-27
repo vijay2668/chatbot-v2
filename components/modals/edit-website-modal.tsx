@@ -115,7 +115,8 @@ export const EditWebsiteModal = ({ user }: any) => {
 
   const [fetching, setfetching] = useState(false);
 
-  const fetchSublinks = async (mainURL: string) => {
+  const fetchSublinks = async (e: any, mainURL: string) => {
+    e.preventDefault();
     const trimTrailingSlash = (url: string) =>
       url.endsWith("/") ? url.slice(0, -1) : url;
 
@@ -128,10 +129,24 @@ export const EditWebsiteModal = ({ user }: any) => {
 
     setfetching(true);
     const res = await axios.post("/api/fetchSublinks", { mainURL: trimed });
-
+    console.log(res);
     if (res.status === 200) {
-      toast.success("Sublinks Fetched");
-      setUrls(res.data);
+      if (res?.data?.length === 0) {
+        toast(() => (
+          <div>
+            <div className="flex items-center space-x-2">
+              <Info width={20} height={20} className="text-indigo-500" />
+              Unable to Extract Sublinks
+            </div>
+            <br />
+            <p>Can you Please Add some Links of Main URL</p>
+          </div>
+        ));
+        setUrls([trimedSlash]);
+      } else {
+        toast.success("Sublinks Fetched");
+        setUrls(res.data);
+      }
       setfetching(false);
     } else {
       toast.error("Failed to fetch sublinks");
@@ -173,7 +188,11 @@ export const EditWebsiteModal = ({ user }: any) => {
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={
+              urls.length === 0
+                ? (e) => fetchSublinks(e, form?.getValues()?.websiteURL)
+                : form.handleSubmit(onSubmit)
+            }
             className="space-y-2 max-h-full overflow-hidden flex flex-col"
           >
             <div className="space-y-2 px-6 w-full max-h-full flex flex-col">
@@ -200,10 +219,10 @@ export const EditWebsiteModal = ({ user }: any) => {
                           </FormControl>
                           {urls?.length === 0 && (
                             <Button
-                              type="button"
+                              type="submit"
                               variant="destructive"
                               disabled={fetching}
-                              onClick={() => fetchSublinks(field.value)}
+                              // onClick={() => fetchSublinks(field.value)}
                             >
                               Fetch
                             </Button>
