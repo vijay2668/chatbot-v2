@@ -38,7 +38,7 @@ const ChatbotPage = () => {
     (item: any) => item.bot_id === params?.chatbotId
   );
 
-  console.log(params?.chatbotId)
+  // console.log(params?.chatbotId)
 
   useEffect(() => {
     if (params?.userId) {
@@ -149,42 +149,6 @@ const ChatbotPage = () => {
     ]);
   }, [chatbotUI?.welcome_message]);
 
-  const Chat_Bubble_Icons = [
-    {
-      label: "LiaRobotSolid",
-      icon: () => <LiaRobotSolid className="text-xs" />
-    },
-    {
-      label: "BsRobot",
-      icon: () => <BsRobot className="text-xs" />
-    },
-    {
-      label: "BiSupport",
-      icon: () => <BiSupport className="text-xs" />
-    },
-    {
-      label: "MdChatBubbleOutline",
-      icon: () => <MdChatBubbleOutline className="text-xs" />
-    },
-    {
-      label: "MdSupportAgent",
-      icon: () => <MdSupportAgent className="text-xs" />
-    },
-    {
-      label: "SlSupport",
-      icon: () => <SlSupport className="text-xs" />
-    },
-    {
-      label: "SiProbot",
-      icon: () => <SiProbot className="text-xs" />
-    }
-  ];
-
-
-
-  const filteredIcon: any = Chat_Bubble_Icons.find(
-    (item) => item?.label === chatbotUI?.chat_bubble_icon
-  );
 
   if (chatbotUI) {
     return (
@@ -224,7 +188,12 @@ const ChatbotPage = () => {
                     if (message.role === "bot") {
                       icon = (
                         <div className="p-1 mt-1.5 border border-black rounded-full">
-                          {filteredIcon?.icon()}
+                          <img
+                            id="chat-bubble-icon"
+                            src={chatbotUI?.chat_bubble_icon}
+                            alt="chat bubble icon"
+                            className="w-3 h-3"
+                          />
                         </div>
                       );
                       className =

@@ -109,7 +109,7 @@ export const WebsiteModal = ({ user }: any) => {
           description: "",
           company_logo: "",
           bot_avatar: "",
-          chat_bubble_icon: "BiSupport",
+          chat_bubble_icon: "https://utfs.io/f/2092fc67-cb66-498b-aafe-adea4e250573-55pms0.svg",
           accent_colour: "#6366f1",
           subheading: "Our bot answers instantly",
           welcome_message: "Hey there, how can I help you?",

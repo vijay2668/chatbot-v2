@@ -26,7 +26,7 @@ interface ChatMessage {
 }
 
 // Destructure props directly in the function parameters
-export const ChatbotDemoPage = ({ user, params }:any) => {
+export const ChatbotDemoPage = ({ user, params }: any) => {
   const [open, setOpen] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentChatbot, setCurrentChatbot] = useState<any>(null);
@@ -135,43 +135,6 @@ export const ChatbotDemoPage = ({ user, params }:any) => {
     // }
   }, [chatbotUI?.welcome_message]);
 
-  const Chat_Bubble_Icons = [
-    {
-      label: "LiaRobotSolid",
-      icon: () => <LiaRobotSolid className="text-xs" />
-    },
-    {
-      label: "BsRobot",
-      icon: () => <BsRobot className="text-xs" />
-    },
-    {
-      label: "BiSupport",
-      icon: () => <BiSupport className="text-xs" />
-    },
-    {
-      label: "MdChatBubbleOutline",
-      icon: () => <MdChatBubbleOutline className="text-xs" />
-    },
-    {
-      label: "MdSupportAgent",
-      icon: () => <MdSupportAgent className="text-xs" />
-    },
-    {
-      label: "SlSupport",
-      icon: () => <SlSupport className="text-xs" />
-    },
-    {
-      label: "SiProbot",
-      icon: () => <SiProbot className="text-xs" />
-    }
-  ];
-
-
-
-  const filteredIcon: any = Chat_Bubble_Icons.find(
-    (item) => item?.label === chatbotUI?.chat_bubble_icon
-  );
-
 
   if (chatbotUI) {
     return (
@@ -211,7 +174,12 @@ export const ChatbotDemoPage = ({ user, params }:any) => {
                     if (message.role === "bot") {
                       icon = (
                         <div className="p-1 mt-1.5 border border-black rounded-full">
-                          {filteredIcon?.icon()}
+                          <img
+                            id="chat-bubble-icon"
+                            src={chatbotUI?.chat_bubble_icon}
+                            alt="chat bubble icon"
+                            className="w-3 h-3"
+                          />
                         </div>
                       );
                       className =
