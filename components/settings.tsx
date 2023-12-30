@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Info, X } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
@@ -114,6 +114,23 @@ const Settings = ({ user }: any) => {
     "https://utfs.io/f/e7b5709b-eb56-48d2-be38-bc8b85fd7942-uoa3ht.svg",
     "https://utfs.io/f/869ea975-76c3-4f87-861a-53a15b175fe5-1wk75.svg"
   ];
+
+  const mainURL =
+    typeof window !== "undefined" && window.location.origin
+      ? window.location.origin
+      : "";
+
+  console.log(mainURL);
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted || !mainURL) {
+    return null;
+  }
 
   return (
     <>
@@ -664,7 +681,7 @@ const Settings = ({ user }: any) => {
           "absolute bottom-0 p-4 right-0 w-full h-[80vh] rounded-xl sm:max-w-[400px]"
         )}
         frameBorder="0"
-        src={`http://localhost:3000/${user?.id}/${chatbot?.bot_id}`}
+        src={`${mainURL}/${user?.id}/${chatbot?.bot_id}`}
       />
       <Button
         onClick={() => setOpen(!open)}
