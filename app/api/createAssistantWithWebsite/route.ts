@@ -2,19 +2,20 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import axios from "axios";
 import { currentProfile } from "@/lib/current-profile";
-import OpenAI from "openai";
 import { createAssistant } from "@/lib/OpenAI";
 
 export async function POST(req: Request) {
-  const profile = await currentProfile();
-
   try {
+    const profile = await currentProfile();
+
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
     const { websiteURLs, chatbotName, chatbotInstructions, openAIAPIkey } =
       await req.json();
 
-    console.log("openAIAPIkey", openAIAPIkey);
+    let encodedopenAIAPIkey = btoa(openAIAPIkey);
+
+    console.log("encodedopenAIAPIkey", encodedopenAIAPIkey);
 
     if (websiteURLs.length === 0) {
       return new NextResponse("website urls not found", {
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
     const response = await db.profile.update({
       where: { id: profile.id },
       data: {
-        openAIAPIkey: openAIAPIkey
+        user_key: encodedopenAIAPIkey
       }
     });
 

@@ -8,7 +8,9 @@ export async function GET() {
   try {
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
-    const thread = await createThread(profile?.openAIAPIkey);
+    if (!profile?.user_key) return new NextResponse("openai api key not found", { status: 402 });
+
+    const thread = await createThread(atob(profile?.user_key));
 
     return NextResponse.json(thread);
   } catch (error: any) {

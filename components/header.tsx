@@ -3,14 +3,36 @@ import { UserButton } from "@clerk/nextjs";
 import { Label } from "./ui/label";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { MobileSidebar } from "./mobile-sidebar";
-import { Button } from "./ui/button";
-import { SettingsIcon } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export const DashboardHeader = () => {
   const path = usePathname();
   const params = useParams();
-  const router = useRouter();
-  const chatbotId = params?.chatbotId;
+  const id = params?.id;
+
+  const settings_links = [
+    {
+      label: "Sources",
+      href: "/chatbots/sources/"
+    },
+    {
+      label: "Settings",
+      href: "/chatbots/settings/"
+    },
+    {
+      label: "Connect",
+      href: "/chatbots/connect/"
+    },
+    {
+      label: "Inbox",
+      href: "/chatbots/inbox/"
+    },
+    {
+      label: "Analytics",
+      href: "/chatbots/analytics/"
+    }
+  ];
 
   return (
     <div className="px-4 md:px-6 flex justify-between border-b min-h-[40px] border-gray-1 overflow-auto">
@@ -24,17 +46,24 @@ export const DashboardHeader = () => {
             : "Dashboard"}
         </Label>
       </div>
-      <div className="flex items-center space-x-2">
-        {chatbotId && (
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/settings/${chatbotId}`)}
-            className="h-fit text-gray-700 px-1 py-1 rounded-lg text-xs w-full"
-          >
-            <SettingsIcon width={20} height={20} />
-          </Button>
-        )}
+      {path.includes("/chatbots/") ? (
+        <div className="flex items-center space-x-2">
+          {settings_links.map((link: any, index: number) => (
+            <Link
+              key={index}
+              href={link.href + id}
+              className={cn(
+                path.includes(link.href) ? "border-indigo-500 text-indigo-500" : "border-transparent text-gray-600",
+                "text-sm hover:text-indigo-500/50 border-b-2 w-[60px] hover:border-indigo-500/50 h-full flex items-center justify-center font-semibold transition-all"
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
 
+      <div className="flex items-center space-x-2">
         <UserButton
           afterSignOutUrl="/"
           appearance={{

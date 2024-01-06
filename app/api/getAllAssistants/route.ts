@@ -7,8 +7,9 @@ export async function GET() {
 
   try {
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
+    if (!profile?.user_key) return new NextResponse("openai api key not found", { status: 402 });
 
-    const assistants = await getAssistants(profile?.openAIAPIkey);
+    const assistants = await getAssistants(atob(profile?.user_key));
 
     console.log("assistants-list", assistants);
     return NextResponse.json(assistants);

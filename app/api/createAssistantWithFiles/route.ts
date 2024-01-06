@@ -1,17 +1,13 @@
 import { UploadFile, createAssistant } from "@/lib/OpenAI";
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
-import axios from "axios";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 
 export async function POST(req: Request) {
   try {
     const profile = await currentProfile();
 
-    if (!profile) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
+    if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
     const formData = await req.formData();
 
@@ -20,7 +16,9 @@ export async function POST(req: Request) {
     const chatbotInstructions: any = formData.get("chatbotInstructions");
     const openAIAPIkey: any = formData.get("openAIAPIkey");
 
-    console.log("openAIAPIkey", openAIAPIkey);
+    let encodedopenAIAPIkey = btoa(openAIAPIkey);
+
+    console.log("encodedopenAIAPIkey", encodedopenAIAPIkey);
 
     let fileIDs: any = [];
 
@@ -48,7 +46,7 @@ export async function POST(req: Request) {
     const response = await db.profile.update({
       where: { id: profile.id },
       data: {
-        openAIAPIkey: openAIAPIkey
+        user_key: encodedopenAIAPIkey
       }
     });
 

@@ -31,7 +31,7 @@ export const DashboardPage = ({ user }: any) => {
         Welcome to Chatbot
       </h1>
       <div className="flex flex-col gap-4 px-6 pb-6 md:px-8 md:flex-row">
-        <div className="flex-1 md:w-1/3 w-full">
+        {/* <div className="flex-1 md:w-1/3 w-full">
           <Button
             onClick={() => onOpen("file")}
             variant="outline"
@@ -66,24 +66,25 @@ export const DashboardPage = ({ user }: any) => {
               </div>
             </div>
           </Button>
-        </div>
-        {/* <div className="flex-1 md:w-1/3 w-full">
+        </div> */}
+        <div className="flex-1 md:w-1/3 w-full">
           <Button
             variant="outline"
+            onClick={() => onOpen("newchatbot")}
             className=" w-full h-full py-3 justify-start rounded-xl"
           >
             <div className="flex items-center gap-3">
               <div className="flex flex-col gap-1">
                 <Label className="text-sm font-semibold text-left whitespace-normal">
-                  Import an OpenAI Assistant Bot
+                  Create a Support Bot
                 </Label>
                 <p className="text-xs text-gray-500 whitespace-normal text-left">
-                  Connect your existing OpenAI Assistant to Botsonic
+                  Train a custom ChatGPT on your knowledge base
                 </p>
               </div>
             </div>
           </Button>
-        </div> */}
+        </div>
       </div>
     </div>
   );

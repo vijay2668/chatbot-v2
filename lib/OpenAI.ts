@@ -1,5 +1,120 @@
 import OpenAI from "openai";
 
+//create bot
+export const createBot = async ({
+  chatbotName,
+  chatbotInstructions,
+  openAIAPIkey
+}: any) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const assistant = await openai?.beta?.assistants?.create({
+    name: chatbotName,
+    instructions: chatbotInstructions,
+    tools: [{ type: "retrieval" }],
+    model: "gpt-3.5-turbo-1106"
+  });
+
+  return assistant;
+};
+
+//rename bot
+export const renameBot = async ({
+  chatbotName,
+  assistantId,
+  openAIAPIkey
+}: any) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const assistant = await openai?.beta?.assistants?.update(assistantId, {
+    name: chatbotName
+  });
+
+  return assistant;
+};
+
+// modify bot
+export const modifyBot = async ({
+  assistantId,
+  fileIDs,
+  openAIAPIkey
+}: any) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const assistant = await openai?.beta?.assistants?.update(assistantId, {
+    file_ids: fileIDs.map((fileID: any) => fileID)
+  });
+
+  return assistant;
+};
+
+// modify bot instructions
+export const modifyBotInstruction = async ({
+  assistantId,
+  chatbotInstructions,
+  openAIAPIkey
+}: any) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const assistant = await openai?.beta?.assistants?.update(assistantId, {
+    instructions: chatbotInstructions,
+  });
+
+  return assistant;
+};
+
+// modify bot model
+export const modifyBotModel = async ({
+  assistantId,
+  is_gpt_4,
+  openAIAPIkey
+}: any) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const assistant = await openai?.beta?.assistants?.update(assistantId, {
+    model: is_gpt_4 ? "gpt-4-1106-preview" : "gpt-3.5-turbo-1106"
+  });
+
+  return assistant;
+};
+
+// remove file permanently
+export const removeFile = async (sourceId: string, openAIAPIkey: any) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const file = await openai.files.del(sourceId);
+
+  return file;
+};
+
+// remove file from bot
+export const removeFileFromBot = async (sourceId: string, assistantId: string, openAIAPIkey: any) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const deletedAssistantFile = await openai.beta.assistants.files.del(
+    assistantId,
+    sourceId
+  );
+
+  return deletedAssistantFile;
+};
+
+
+
 //create assistants
 export const createAssistant = async ({
   chatbotName,
@@ -73,6 +188,17 @@ export const getAssistants = async (openAIAPIkey: any) => {
   });
 
   return assistants?.data;
+};
+
+//get assistant
+export const getAssistant = async (openAIAPIkey: any, assistantId: string) => {
+  const openai: any = new OpenAI({
+    apiKey: openAIAPIkey
+  });
+
+  const assistant = await openai?.beta?.assistants?.retrieve(assistantId);
+
+  return assistant;
 };
 
 //delete assistant

@@ -9,6 +9,10 @@ export async function POST(req: Request) {
   try {
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
+    if (!profile?.user_key) {
+      return new NextResponse("openai api key not found", { status: 402 });
+    }
+
     const { assistantId, websiteURLs, chatbotName, chatbotInstructions } =
       await req.json();
 
@@ -31,7 +35,7 @@ export async function POST(req: Request) {
 
     // sending sublinks and openai API key for generating fileIDs of all links
     const res = await axios.post(BACKEND_URL, {
-      openAIAPIkey: profile?.openAIAPIkey,
+      openAIAPIkey: atob(profile?.user_key),
       websiteURLs: websiteURLs
     });
 
@@ -45,7 +49,7 @@ export async function POST(req: Request) {
       chatbotName,
       chatbotInstructions,
       fileIDs,
-      openAIAPIkey: profile?.openAIAPIkey
+      openAIAPIkey: atob(profile?.user_key)
     });
 
     console.log("step 3:", assistant);

@@ -16,25 +16,41 @@ import { useEffect, useState } from "react";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { Chatbot } from "@prisma/client";
 
-export const ChatbotList = ({ user }: any) => {
-  const [chatbots, setChatbots] = useState<any>([]);
+export const ChatbotList = ({ user, chatbots }: any) => {
   const { onOpen } = useModal();
   const router = useRouter();
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  const find_choosen_chatbot_ui = (choosen_bot_id: string) => {
+    const finded = user.chatbots.find(
+      (chatbot: Chatbot) => chatbot.bot_id === choosen_bot_id
+    );
+
+    router.push(`/chatbots/${finded?.id}`);
+  };
 
   const handleDelete = async (assistant: any) => {
     try {
       const response = await axios.post("/api/deleteAssistant", {
-        assistantID: assistant?.id
+        assistant: assistant
       });
 
       const data = response.data;
 
       if (data.deleted) {
-        const filterAssistant = chatbots.filter(
-          (chatbot: any) => chatbot.id !== data.id
-        );
-        setChatbots(filterAssistant);
+        router.refresh();
       }
     } catch (error: any) {
       toast.error(error);
@@ -42,29 +58,8 @@ export const ChatbotList = ({ user }: any) => {
   };
 
   const handle = async (assistant: any) => {
-    const file = await axios.post("/api/fileRetrieve", {
-      file_ids: assistant?.file_ids
-    });
-
-    const { filename } = file?.data;
-
-    if (filename === "upload") {
-      onOpen("editWebsite", assistant);
-    } else {
-      onOpen("editFile", assistant);
-    }
+    onOpen("newchatbot", assistant);
   };
-
-  useEffect(() => {
-    if (user?.openAIAPIkey) {
-      const getAllAssistants = async () => {
-        //Getting all Assistant which have been made by user
-        const assistants = await axios.get("/api/getAllAssistants");
-        setChatbots(assistants?.data);
-      };
-      getAllAssistants();
-    }
-  }, [user?.openAIAPIkey]);
 
   return (
     <>
@@ -83,7 +78,7 @@ export const ChatbotList = ({ user }: any) => {
             </CardHeader>
             <CardFooter className="p-0 space-x-2">
               <Button
-                onClick={() => router.push(`/chatbots/${chatbot?.id}`)}
+                onClick={() => find_choosen_chatbot_ui(chatbot.id)}
                 variant="primary"
                 className="h-fit rounded-lg text-xs w-full"
               >
@@ -93,9 +88,9 @@ export const ChatbotList = ({ user }: any) => {
                 <DropdownMenuTrigger>
                   <Button
                     variant="outline"
-                    className="h-fit px-1 py-1 rounded-lg text-xs w-full"
+                    className="h-fit px-1.5 py-1.5 rounded-lg text-lg w-full"
                   >
-                    <Settings width={20} height={20} />
+                    <BsThreeDotsVertical />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>

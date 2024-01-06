@@ -62,16 +62,16 @@ export const WebsiteModal = ({ user }: any) => {
   });
 
   useEffect(() => {
-    if (user) {
-      form.setValue("openAIAPIkey", user.openAIAPIkey);
+    if (user?.user_key) {
+      form.setValue("openAIAPIkey", atob(user?.user_key));
     }
-  }, [form, user]);
+  }, [form, user?.user_key]);
 
   const [urls, setUrls] = useState<any>([]);
   const [selectedUrls, setSelectedUrls] = useState([]);
 
   const handleClose = () => {
-    if (user?.openAIAPIkey) {
+    if (atob(user?.user_key)) {
       form.setValue("websiteURL", "");
       form.setValue("chatbotName", "");
       form.setValue("chatbotInstructions", "");
@@ -109,7 +109,8 @@ export const WebsiteModal = ({ user }: any) => {
           description: "",
           company_logo: "",
           bot_avatar: "",
-          chat_bubble_icon: "https://utfs.io/f/2092fc67-cb66-498b-aafe-adea4e250573-55pms0.svg",
+          chat_bubble_icon:
+            "https://utfs.io/f/2092fc67-cb66-498b-aafe-adea4e250573-55pms0.svg",
           accent_colour: "#6366f1",
           subheading: "Our bot answers instantly",
           welcome_message: "Hey there, how can I help you?",
@@ -333,7 +334,8 @@ export const WebsiteModal = ({ user }: any) => {
                           <span className="text-red-600 text-lg">*</span>
                           <FormControl>
                             <Input
-                              disabled={isLoading || user?.openAIAPIkey}
+                              type="password"
+                              disabled={isLoading || user?.user_key}
                               className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
                               placeholder="Enter OpenAI API Key"
                               {...field}

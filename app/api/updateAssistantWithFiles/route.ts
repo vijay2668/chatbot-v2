@@ -1,7 +1,6 @@
 import { UploadFile, modifyAssistant } from "@/lib/OpenAI";
 import { currentProfile } from "@/lib/current-profile";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 
 export async function POST(req: Request) {
   try {
@@ -9,6 +8,9 @@ export async function POST(req: Request) {
 
     if (!profile) {
       return new NextResponse("Unauthorized", { status: 401 });
+    }
+    if (!profile?.user_key) {
+      return new NextResponse("openai api key not found", { status: 402 });
     }
 
     const formData = await req.formData();
@@ -23,7 +25,7 @@ export async function POST(req: Request) {
     let fileIDs: any = [];
 
     for (let file of files) {
-      const res = await UploadFile(file, profile?.openAIAPIkey);
+      const res = await UploadFile(file, atob(profile?.user_key));
       fileIDs.push(res.id);
     }
 
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
       chatbotName,
       chatbotInstructions,
       fileIDs: file_ids ? [...fileIDs, ...file_ids] : fileIDs,
-      openAIAPIkey: profile?.openAIAPIkey
+      openAIAPIkey: atob(profile?.user_key)
     });
 
     console.log("fileIDs", file_ids ? [...fileIDs, ...file_ids] : fileIDs);

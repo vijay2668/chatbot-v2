@@ -44,7 +44,7 @@ export function ChatBot({ user, chatbotId }: any) {
   }, [chatbotId, chatbots]);
 
   useEffect(() => {
-    if (user?.openAIAPIkey) {
+    if (user?.user_key) {
       const getAllAssistants = async () => {
         //Getting all Assistant which have been made by user
         const assistants = await axios.get("/api/getAllAssistants");
@@ -54,7 +54,7 @@ export function ChatBot({ user, chatbotId }: any) {
     } else {
       router.push("/dashboard");
     }
-  }, [router, user?.openAIAPIkey]);
+  }, [router, user?.user_key]);
 
   // console.log(chatbots);
   // Refs

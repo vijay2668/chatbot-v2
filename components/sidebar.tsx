@@ -138,7 +138,7 @@ export const Sidebar = () => {
             <Link
               href="/dashboard"
               className={cn(
-                path === "/dashboard" && "bg-gray-800",
+                path.includes("/dashboard") && "bg-gray-800",
                 "flex items-center space-x-2 text-white rounded-lg p-3 mx-4 hover:bg-gray-800"
               )}
             >
@@ -152,7 +152,7 @@ export const Sidebar = () => {
             <Link
               href="/chatbots"
               className={cn(
-                path === "/chatbots" && "bg-gray-800",
+                path.includes("/chatbots") && "bg-gray-800",
                 "flex items-center space-x-2 text-white rounded-lg p-3 mx-4 hover:bg-gray-800"
               )}
             >

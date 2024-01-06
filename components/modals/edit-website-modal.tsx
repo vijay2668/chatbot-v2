@@ -89,8 +89,8 @@ export const EditWebsiteModal = ({ user }: any) => {
 
     try {
       const res = await axios.post("/api/updateAssistantWithWebsite", {
-        ...values,
-        openAIAPIkey: user?.openAIAPIkey,
+        chatbotName: values.chatbotName,
+        chatbotInstructions: values.chatbotInstructions,
         assistantId: data?.id,
         websiteURLs: selectedUrls
       });
