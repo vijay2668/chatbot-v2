@@ -7,12 +7,13 @@ import {
   runCheck
 } from "@/lib/OpenAI";
 import { db } from "@/lib/db";
+import { FAQ, Role } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
     const profile = await currentProfile();
 
-    const { threadId, question, assistant } = await req.json();
+    const { threadId, question, assistant, count } = await req.json();
 
     //only accept post requests
     if (!profile) {
@@ -38,6 +39,9 @@ export async function POST(req: Request) {
       where: {
         bot_id: assistant.id
       },
+      include: {
+        faqs: true
+      }
     })
 
     if (!chatbotUI) {
@@ -48,14 +52,57 @@ export async function POST(req: Request) {
       return NextResponse.json({ files_not_uploaded_message: chatbotUI.files_not_uploaded_message });
     }
 
-
-
     if (chatbotUI.messages_used === chatbotUI.messages_limit_per_day) {
       return NextResponse.json({ messages_limit_warning_message: chatbotUI.messages_limit_warning_message });
     }
 
+
     // OpenAI recommends replacing newlines with spaces for best results
     const sanitizedQuestion = question.trim().replaceAll("\n", " ");
+
+
+    if (count === 0) {
+      await db.messages.create({
+        data: {
+          profileId: profile.id,
+          chatbotId: chatbotUI.id,
+          thread_id: threadId
+        }
+      })
+    }
+
+    const getCreatedMessages = await db.messages.findFirst({
+      where: {
+        thread_id: threadId
+      },
+    })
+
+    if (!getCreatedMessages) return new Response("messages as container not found")
+
+
+    await db.message.create({
+      data: {
+        role: Role.USER,
+        content: sanitizedQuestion,
+        messagesId: getCreatedMessages.id,
+        chatbotId: chatbotUI.id,
+      }
+    })
+
+
+    const findFaq = chatbotUI.faqs.find((faq: FAQ) => faq.question.includes(sanitizedQuestion))
+
+    if (findFaq?.answer) {
+      const faq_reply = await db.message.create({
+        data: {
+          role: Role.BOT,
+          content: findFaq.answer,
+          messagesId: getCreatedMessages.id,
+          chatbotId: chatbotUI.id,
+        }
+      })
+      return NextResponse.json(faq_reply);
+    }
 
     const userMessage = await createMessage({
       threadId,
@@ -63,7 +110,9 @@ export async function POST(req: Request) {
       openAIAPIkey: atob(profile?.user_key)
     });
 
+
     console.log("userMessage", userMessage);
+
 
     const run = await runAssistant({
       assistantId: assistant.id,
@@ -105,14 +154,21 @@ export async function POST(req: Request) {
 
     console.log(lastMessageForRun);
 
-    if (lastMessageForRun) {
-      await db.chatbot.updateMany({
-        where: { bot_id: assistant.id },
-        data: { messages_used: chatbotUI.messages_used + 1 }
-      })
-    }
+    await db.chatbot.updateMany({
+      where: { bot_id: assistant.id },
+      data: { messages_used: chatbotUI.messages_used + 1 }
+    })
 
-    return NextResponse.json(lastMessageForRun);
+
+    const assistant_reply = await db.message.create({
+      data: {
+        content: lastMessageForRun.content[0].text.value,
+        messagesId: getCreatedMessages?.id,
+        chatbotId: chatbotUI.id,
+      }
+    })
+
+    return NextResponse.json(assistant_reply);
   } catch (error: any) {
     console.log("error", error);
     return new NextResponse("Something went wrong", { status: 500 });

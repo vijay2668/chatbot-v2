@@ -14,10 +14,8 @@ model Profile {
 
   user_key String?
 
-  // daily_messages_limit Int //daily messages limit will be 30
-
   chatbots Chatbot[]
-  // threads  Thread[]
+  Messages Messages[]
 
   createdAt DateTime @default(now())
 }
@@ -55,16 +53,15 @@ model Chatbot {
   show_user_form                 Boolean
   files_not_uploaded_message     String
 
-  profileId String  @db.ObjectId
-  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId     String     @db.ObjectId
+  profile       Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  messages_list Messages[]
+  fields        Field[]
+  faqs          FAQ[]
 
-  threads           Thread[]
-  fields            Field[]
-  faqs              FAQ[]
-  starter_questions SQ[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Message   Message[]
 
   @@index([profileId])
 }
@@ -101,22 +98,12 @@ model FAQ {
   @@index([chatbotId])
 }
 
-model SQ {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  question String
-  answer   String
-
-  chatbotId String  @db.ObjectId
-  chatbot   Chatbot @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([chatbotId])
+enum Role {
+  USER
+  BOT
 }
 
-model Thread {
+model Messages {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   thread_id String
@@ -124,14 +111,31 @@ model Thread {
   chatbotId String  @db.ObjectId
   chatbot   Chatbot @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
 
-  // profileId String  @db.ObjectId
-  // profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId String  @db.ObjectId
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  // num_messages Int
+  messages Message[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // @@index([profileId])
+
+  @@index([profileId])
+  @@index([chatbotId])
+}
+
+model Message {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  role    Role   @default(BOT)
+  content String
+
+  chatbotId String  @db.ObjectId
+  chatbot   Chatbot @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  messagesId String   @db.ObjectId
+  messages   Messages @relation(fields: [messagesId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@index([chatbotId])
+  @@index([messagesId])
 }

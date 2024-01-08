@@ -9,7 +9,7 @@ export async function POST(req: Request) {
 
     const { question, answer, chatbotId } = await req.json();
 
-    const sq = await db.sQ.create({
+    const faq = await db.fAQ.create({
       data: {
         question,
         answer,
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       }
     })
 
-    return NextResponse.json(sq);
+    return NextResponse.json(faq);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

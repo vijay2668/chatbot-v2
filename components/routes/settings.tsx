@@ -3,12 +3,10 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
-import toast from "react-hot-toast";
 import { AppearanceForm } from "@/components/forms/appearance-form";
 import Image from "next/image";
 import { BotSettingsForm } from "../forms/bot-settings-form";
-import { StarterQuestionsForm } from "../forms/starter-questions-form";
+import { FAQsForm } from "../forms/faqs-form";
 import { UserForm } from "../forms/user-form";
 
 const Settings = ({ user, chatbotUI }: any) => {
@@ -31,8 +29,8 @@ const Settings = ({ user, chatbotUI }: any) => {
       component: () => <BotSettingsForm chatbotUI={chatbotUI} />
     },
     {
-      label: "Starter questions",
-      component: () => <StarterQuestionsForm chatbotUI={chatbotUI} />
+      label: "FAQs",
+      component: () => <FAQsForm chatbotUI={chatbotUI} />
     },
     {
       label: "User form",

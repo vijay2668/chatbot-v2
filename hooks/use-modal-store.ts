@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ModalType = 'file'| 'editFile' | 'website' | 'editWebsite' | 'starterQuestions' | 'learnMore' | 'newchatbot';
+export type ModalType = 'file'| 'editFile' | 'website' | 'editWebsite' | 'FAQ' | 'learnMore' | 'newchatbot';
 
 interface ModalStore {
   type: ModalType | null;

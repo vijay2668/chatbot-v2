@@ -7,15 +7,15 @@ export async function POST(req: Request) {
     const profile = await currentProfile();
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
-    const { starter_question_id } = await req.json();
+    const { faq_id } = await req.json();
 
-    const sq = await db.sQ.delete({
+    const faq = await db.fAQ.delete({
       where: {
-        id: starter_question_id,
+        id: faq_id,
       }
     })
 
-    return NextResponse.json(sq);
+    return NextResponse.json(faq);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

@@ -19,10 +19,8 @@ const SettingPage = async ({ params }: ChatbotIdPageProps) => {
       id: params.id
     },
     include: {
-      threads: true,
       faqs: true,
-      fields: true,
-      starter_questions: true
+      fields: true
     }
   });
 

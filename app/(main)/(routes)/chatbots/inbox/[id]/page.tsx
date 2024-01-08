@@ -19,30 +19,32 @@ const InboxPage = async ({ params }: ChatbotIdPageProps) => {
       id: params.id
     },
     include: {
-      threads: true
+      messages_list: true
     }
   });
 
   if (!chatbotUI) return;
 
-  let list_of_thread_from_current_bot = [];
+  let messages_list = [];
 
-  for (let thread of chatbotUI.threads) {
-    const current_thread = await getMessages(
-      thread.thread_id,
-      atob(profile.user_key)
-    );
-    console.log("current_thread", current_thread)
-    list_of_thread_from_current_bot.push(current_thread.data);
+  for (let messages of chatbotUI.messages_list) {
+    const getMessages = await db.messages.findUnique({
+      where: {
+        id: messages.id
+      },
+      include: {
+        messages: true
+      }
+    });
+
+    messages_list.push(getMessages);
   }
 
-  if (!list_of_thread_from_current_bot) return;
+  messages_list.sort((a: any, b: any) => b?.createdAt - a?.createdAt);
 
   return (
     <div className="flex flex-col w-full h-full p-8">
-      <Inbox
-        list_of_thread_from_current_bot={list_of_thread_from_current_bot}
-      />
+      <Inbox messages_list={messages_list} chatbotUI={chatbotUI} />
     </div>
   );
 };

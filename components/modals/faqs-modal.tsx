@@ -29,11 +29,11 @@ import { Textarea } from "../ui/textarea";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export const StarterQuestionsModal = () => {
+export const FAQsModal = () => {
   const router = useRouter();
   const { isOpen, onClose, type, data } = useModal();
 
-  const isModalOpen = isOpen && type === "starterQuestions";
+  const isModalOpen = isOpen && type === "FAQ";
 
   const formSchema = z.object({
     question: z.string().min(1, {
@@ -53,11 +53,17 @@ export const StarterQuestionsModal = () => {
   });
 
   useEffect(() => {
-    if (data?.starter_question) {
-      form.setValue("question", data?.starter_question?.question);
-      form.setValue("answer", data?.starter_question?.answer);
+    if (data?.question) {
+      form.setValue("question", data?.question);
     }
-  }, [data?.starter_question, form]);
+  }, [data?.question, form]);
+
+  useEffect(() => {
+    if (data?.faq) {
+      form.setValue("question", data?.faq?.question);
+      form.setValue("answer", data?.faq?.answer);
+    }
+  }, [data?.faq, form]);
 
   const handleClose = () => {
     form.reset();
@@ -69,32 +75,32 @@ export const StarterQuestionsModal = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (data?.starter_question) {
+      if (data?.faq) {
         const response = await axios.post("/api/modifyStarterQuestion", {
           ...values,
-          starter_question_id: data?.starter_question?.id
+          faq_id: data?.faq?.id
         });
         if (response.status === 200) {
           handleClose();
-          toast.success("Successfully updated starter question!");
+          toast.success("Successfully updated FAQ!");
           router.refresh();
         }
         return;
       }
 
-      const response = await axios.post("/api/addStarterQuestion", {
+      const response = await axios.post("/api/addFAQ", {
         ...values,
         chatbotId: data.chatbotId
       });
 
       if (response.status === 200) {
         handleClose();
-        toast.success("Successfully added starter question!");
+        toast.success("Successfully added FAQ!");
         router.refresh();
       }
     } catch (error: any) {
       toast.error(
-        error.message || "An error occurred While creating Starter Question"
+        error.message || "An error occurred While creating FAQ"
       );
     }
   };
@@ -104,9 +110,7 @@ export const StarterQuestionsModal = () => {
       <DialogContent className="bg-white text-black p-0 max-h-screen overflow-hidden flex flex-col">
         <DialogHeader className="pt-2 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
-            {data?.starter_question
-              ? "Update a starter question"
-              : "Add a starter question"}
+            {data?.faq ? "Update a FAQ" : "Add a New FAQ"}
           </DialogTitle>
         </DialogHeader>
         <Separator />

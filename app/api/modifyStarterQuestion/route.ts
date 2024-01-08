@@ -7,11 +7,11 @@ export async function POST(req: Request) {
     const profile = await currentProfile();
     if (!profile) return new NextResponse("Unauthorized", { status: 401 });
 
-    const { question, answer, starter_question_id } = await req.json();
+    const { question, answer, faq_id } = await req.json();
 
-    const sq = await db.sQ.update({
+    const faq = await db.fAQ.update({
       where: {
-        id: starter_question_id
+        id: faq_id
       },
       data: {
         question,
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       }
     })
 
-    return NextResponse.json(sq);
+    return NextResponse.json(faq);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

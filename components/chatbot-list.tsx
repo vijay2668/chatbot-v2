@@ -98,7 +98,7 @@ export const ChatbotList = ({ user, chatbots }: any) => {
                     onClick={() => handle(chatbot)}
                     className="cursor-pointer"
                   >
-                    Modify
+                    Rename
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem

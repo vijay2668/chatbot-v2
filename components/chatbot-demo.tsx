@@ -10,6 +10,7 @@ import ReactMarkdown from "react-markdown";
 import { User } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { FAQ, Role } from "@prisma/client";
 
 interface ChatMessage {
   role: string;
@@ -19,8 +20,8 @@ interface ChatMessage {
 // Destructure props directly in the function parameters
 export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [messageIndex, setMessageIndex] = useState<any>(0);
   const [query, setQuery] = useState<string>("");
+  const [count, setCount] = useState<number>(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   // Set initial bot greeting message
@@ -28,22 +29,10 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
     setMessages([
       {
         message: chatbotUI?.welcome_message,
-        role: "bot"
+        role: Role.BOT
       }
     ]);
   }, []);
-
-  useEffect(() => {
-    if (messageIndex === 1) {
-      const saveConversationThread = async () => {
-        await axios.post("/api/saveThread", {
-          chatbotId: chatbotUI?.id,
-          thread_id: thread?.id
-        });
-      };
-      saveConversationThread();
-    }
-  }, [messageIndex]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,7 +47,7 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
     setMessages((prevChats: ChatMessage[]) => [
       ...prevChats,
       {
-        role: "user",
+        role: Role.USER,
         message: question
       }
     ]);
@@ -70,7 +59,8 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
       const response = await axios.post("/api/chat", {
         question,
         assistant: assistant,
-        threadId: thread?.id
+        threadId: thread?.id,
+        count
       });
       const data = await response.data;
 
@@ -83,7 +73,7 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
         setMessages((prevChats: ChatMessage[]) => [
           ...prevChats,
           {
-            role: "bot",
+            role: Role.BOT,
             message: data.files_not_uploaded_message
           }
         ]);
@@ -94,7 +84,7 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
         setMessages((prevChats: ChatMessage[]) => [
           ...prevChats,
           {
-            role: "bot",
+            role: Role.BOT,
             message: data.messages_limit_warning_message
           }
         ]);
@@ -104,12 +94,12 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
       setMessages((prevChats: ChatMessage[]) => [
         ...prevChats,
         {
-          role: "bot",
-          message: data.content[0].text.value
+          role: Role.BOT,
+          message: data.content
         }
       ]);
 
-      setMessageIndex(messageIndex + 1);
+      setCount(count + 1);
     } catch (error: any) {
       toast.error(error.message);
       console.error("Error in chat request:", error);
@@ -117,6 +107,73 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
       setLoading(false);
     }
   }
+
+  const handleFaqSubmit = async (query: string) => {
+    const question = query.trim();
+
+    setMessages((prevChats: ChatMessage[]) => [
+      ...prevChats,
+      {
+        role: Role.USER,
+        message: question
+      }
+    ]);
+
+    setLoading(true);
+    setQuery("");
+
+    try {
+      const response = await axios.post("/api/chat", {
+        question,
+        assistant: assistant,
+        threadId: thread?.id,
+        count
+      });
+      const data = await response.data;
+
+      if (data.last_error) {
+        toast.error(data.last_error.message);
+        return;
+      }
+
+      if (data?.files_not_uploaded_message) {
+        setMessages((prevChats: ChatMessage[]) => [
+          ...prevChats,
+          {
+            role: Role.BOT,
+            message: data.files_not_uploaded_message
+          }
+        ]);
+        return;
+      }
+
+      if (data?.messages_limit_warning_message) {
+        setMessages((prevChats: ChatMessage[]) => [
+          ...prevChats,
+          {
+            role: Role.BOT,
+            message: data.messages_limit_warning_message
+          }
+        ]);
+        return;
+      }
+
+      setMessages((prevChats: ChatMessage[]) => [
+        ...prevChats,
+        {
+          role: Role.BOT,
+          message: data.content
+        }
+      ]);
+
+      setCount(count + 1);
+    } catch (error: any) {
+      toast.error(error.message);
+      console.error("Error in chat request:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Prevent empty submissions
   const handleEnter = (e: any) => {
@@ -160,7 +217,7 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
                 let className;
 
                 // Determine message sender (bot or user)
-                if (message.role === "bot") {
+                if (message.role === Role.BOT) {
                   icon = (
                     <div className="p-1 mt-1.5 border border-black rounded-full">
                       <img
@@ -178,14 +235,15 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
                     <div
                       style={{
                         borderColor:
-                          message.role === "user" && chatbotUI?.accent_colour
+                          message.role === Role.USER && chatbotUI?.accent_colour
                       }}
                       className="p-1 mt-1.5 border rounded-full"
                     >
                       <User
                         style={{
                           color:
-                            message.role === "user" && chatbotUI?.accent_colour
+                            message.role === Role.USER &&
+                            chatbotUI?.accent_colour
                         }}
                         width={12}
                         height={12}
@@ -203,10 +261,10 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
                     <div
                       style={{
                         background:
-                          message.role === "user" && chatbotUI?.accent_colour
+                          message.role === Role.USER && chatbotUI?.accent_colour
                       }}
                       className={cn(
-                        message.role === "user" && "text-white",
+                        message.role === Role.USER && "text-white",
                         "text-sm p-2 px-2 bg-gray-100 shadow-md max-w-[250px] rounded-xl"
                       )}
                     >
@@ -215,6 +273,22 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
                   </div>
                 );
               })}
+            </div>
+          </div>
+          <div className="flex flex-col w-full h-fit">
+            <div className="px-2 pb-2 flex items-center space-x-2 w-full h-fit overflow-scroll scrollbar-hide">
+              {chatbotUI?.faqs?.map((faq: FAQ) => (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleFaqSubmit(faq.question);
+                  }}
+                  key={faq.id}
+                  className="bg-indigo-500 text-sm cursor-pointer rounded-xl text-white px-2 py-1 w-fit h-fit whitespace-nowrap"
+                >
+                  {faq.question}
+                </button>
+              ))}
             </div>
           </div>
           <Separator />

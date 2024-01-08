@@ -5,7 +5,7 @@ import { FileUploadModal } from "./modals/file-upload-modal";
 import { WebsiteModal } from "./modals/website-modal";
 import { EditFileUploadModal } from "./modals/edit-file-upload-modal";
 import { EditWebsiteModal } from "./modals/edit-website-modal";
-import { StarterQuestionsModal } from "./modals/starter-questions-modal";
+import { FAQsModal } from "./modals/faqs-modal";
 import { LearnMoreModal } from "./modals/learn-more-modal";
 import { CreateBotModal } from "./modals/create-bot-modal";
 
@@ -27,7 +27,7 @@ export const ModalProvider = ({ user }: any) => {
       <EditFileUploadModal user={user} />
       <WebsiteModal user={user} />
       <EditWebsiteModal user={user} />
-      <StarterQuestionsModal />
+      <FAQsModal />
       <LearnMoreModal />
     </>
   );

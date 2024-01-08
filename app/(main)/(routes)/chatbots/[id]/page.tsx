@@ -1,6 +1,7 @@
 import { ChatbotDemoPage } from "@/components/chatbot-demo";
 import { createThread, getAssistant } from "@/lib/OpenAI";
 import { currentProfile } from "@/lib/current-profile";
+import { db } from "@/lib/db";
 import { Chatbot } from "@prisma/client";
 
 interface ChatbotIdPageProps {
@@ -32,9 +33,14 @@ const ChatbotIdPage = async ({ params }: ChatbotIdPageProps) => {
 
   // console.log("assistant", assistant);
 
-  const chatbotUI = profile?.chatbots?.find(
-    (item: Chatbot) => item.id === params?.id
-  );
+  const chatbotUI = await db.chatbot.findUnique({
+    where: {
+      id: params?.id
+    },
+    include: {
+      faqs: true
+    }
+  });
 
   if (!chatbotUI) return;
 
