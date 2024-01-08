@@ -284,7 +284,8 @@ export const ChatbotDemoPage = ({ chatbotUI, assistant, thread }: any) => {
                     handleFaqSubmit(faq.question);
                   }}
                   key={faq.id}
-                  className="bg-indigo-500 text-sm cursor-pointer rounded-xl text-white px-2 py-1 w-fit h-fit whitespace-nowrap"
+                  style={{ background: chatbotUI?.accent_colour }}
+                  className="text-sm cursor-pointer rounded-xl text-white px-2 py-1 w-fit h-fit whitespace-nowrap"
                 >
                   {faq.question}
                 </button>
